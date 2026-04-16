@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Panel — SafeTag</title>
+  <meta name="description" content="Gestiona tus chips NFC desde tu panel SafeTag." />
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+    /* Sidebar */
+    .sidebar {
+      background: rgba(255,255,255,0.02);
+      border-right: 1px solid var(--glass-border);
+      padding: 28px 20px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 36px;
+      padding: 0 8px;
+    }
+    .sidebar-logo-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .sidebar-nav { flex: 1; }
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 4px;
+      transition: var(--transition);
+    }
+    .sidebar-nav a:hover, .sidebar-nav a.active {
+      background: rgba(108, 99, 255, 0.12);
+      color: var(--text-primary);
+    }
+    .sidebar-nav a.active { color: var(--accent-light); }
+    .sidebar-user {
+      border-top: 1px solid var(--glass-border);
+      padding-top: 20px;
+      margin-top: 20px;
+    }
+    .sidebar-user-info { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .user-avatar {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1rem; color: white;
+    }
+    .user-name { font-size: 0.9rem; font-weight: 600; }
+    .user-email { font-size: 0.75rem; color: var(--text-muted); }
+    /* Main content */
+    .main-content { padding: 36px 40px; min-height: 100vh; }
+    /* Stats */
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 36px; }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .stat-icon {
+      width: 48px; height: 48px;
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+    }
+    .stat-icon.purple { background: rgba(108, 99, 255, 0.15); }
+    .stat-icon.green { background: rgba(0, 212, 170, 0.15); }
+    .stat-icon.yellow { background: rgba(255, 201, 77, 0.15); }
+    .stat-value { font-size: 1.8rem; font-weight: 800; }
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); }
+    /* Tags grid */
+    .tags-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+    /* Header actions */
+    .content-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+    /* Link copy */
+    .tag-link-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(108, 99, 255, 0.08);
+      border: 1px solid rgba(108, 99, 255, 0.2);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      font-size: 0.78rem;
+      font-family: monospace;
+      color: var(--accent-light);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .tag-link-box:hover { background: rgba(108, 99, 255, 0.15); }
+    /* Responsive */
+    @media (max-width: 900px) {
+      .dashboard-layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .main-content { padding: 24px 20px; }
+      .stats-row { grid-template-columns: 1fr; }
+      .tags-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">🏷️</div>
+        SafeTag
+      </div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="active">📊 &nbsp;Mis Tags</a>
+        <a href="/" >🏠 &nbsp;Inicio</a>
+      </nav>
+      <div class="sidebar-user">
+        <div class="sidebar-user-info">
+          <div class="user-avatar" id="user-avatar">?</div>
+          <div>
+            <div class="user-name" id="user-name">Cargando...</div>
+            <div class="user-email" id="user-email"></div>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm btn-full" id="btn-logout">🚪 Cerrar sesión</button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-content">
+      <!-- Page header -->
+      <div class="content-header">
+        <div>
+          <h1 class="page-title">Mis Tags NFC</h1>
+          <p class="page-subtitle">Gestiona todos tus chips inteligentes</p>
+        </div>
+        <button class="btn btn-primary" id="btn-new-tag">
+          + Agregar Tag
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon purple">🏷️</div>
+          <div>
+            <div class="stat-value" id="stat-total">0</div>
+            <div class="stat-label">Tags registrados</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">✅</div>
+          <div>
+            <div class="stat-value" id="stat-active">0</div>
+            <div class="stat-label">Tags activos</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon yellow">👁️</div>
+          <div>
+            <div class="stat-value" id="stat-scans">0</div>
+            <div class="stat-label">Escaneos totales</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tags list -->
+      <div id="tags-container">
+        <div class="empty-state">
+          <div class="empty-state-icon">🏷️</div>
+          <h3>Cargando tus tags...</h3>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: Crear/Editar Tag -->
+  <div class="modal-overlay" id="modal-tag">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-title">Nuevo Tag NFC</h2>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+
+      <div class="alert alert-error" id="modal-alert-error">
+        <span>⚠️</span>
+        <span id="modal-error-msg"></span>
+      </div>
+      <div class="alert alert-success" id="modal-alert-success">
+        <span>✅</span>
+        <span id="modal-success-msg"></span>
+      </div>
+
+      <form id="tag-form" novalidate>
+        <input type="hidden" id="tag-edit-id" value="" />
+
+        <div class="form-group">
+          <label class="form-label" for="tag-id">ID del Chip NFC <span style="color: var(--red)">*</span></label>
+          <input class="form-input" type="text" id="tag-id" placeholder="Ej: ST-001A o el código impreso en el chip" required />
+          <div class="form-hint">Este código está impreso en el chip físico que recibiste.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="tag-nombre">Nombre del objeto <span style="color: var(--red)">*</span></label>
+          <input class="form-input" type="text" id="tag-nombre" placeholder="Ej: Mi mochila negra de viaje" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="tag-dueno">Tu nombre público <span style="color: var(--red)">*</span></label>
+            <input class="form-input" type="text" id="tag-dueno" placeholder="El nombre que verá quien encuentre el objeto" required />
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" for="tag-telefono">WhatsApp <span style="color: var(--red)">*</span></label>
+            <input class="form-input" type="tel" id="tag-telefono" placeholder="Ej: +50688889999" required />
+            <div class="form-hint">Con código de país (nunca se mostrará en texto)</div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 16px">
+          <label class="form-label" for="tag-email">Correo de contacto <span style="color: var(--red)">*</span></label>
+          <input class="form-input" type="email" id="tag-email" placeholder="tu@correo.com (nunca se mostrará en texto)" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="tag-mensaje">Mensaje para quien encuentre tu objeto</label>
+          <textarea class="form-textarea" id="tag-mensaje" placeholder="¡Hola! Encontraste mi mochila. Por favor contáctame, te lo agradezco mucho 🙏"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" id="btn-save-tag">
+          Guardar Tag
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Historial de Escaneos -->
+  <div class="modal-overlay" id="modal-scans">
+    <div class="modal" style="max-width: 700px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Historial de Escaneos</h2>
+        <button class="modal-close" id="modal-scans-close">✕</button>
+      </div>
+      <div id="scans-content">
+        <div class="empty-state" style="padding: 40px">
+          <div class="spinner" style="margin: 0 auto"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

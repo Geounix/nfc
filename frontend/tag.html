@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Objeto Encontrado — SafeTag</title>
+  <meta name="description" content="Encontraste un objeto con un chip SafeTag. Contacta al dueño fácilmente." />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    .tag-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+    }
+    .tag-public-card {
+      width: 100%;
+      max-width: 460px;
+      text-align: center;
+    }
+    /* Found animation */
+    .found-icon-wrap {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 28px;
+    }
+    .found-pulse {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: rgba(0, 212, 170, 0.15);
+      animation: found-pulse 2s ease-in-out infinite;
+    }
+    .found-pulse:nth-child(2) { animation-delay: 0.5s; transform: scale(1.2); background: rgba(0, 212, 170, 0.08); }
+    .found-icon-core {
+      position: absolute;
+      inset: 15px;
+      background: linear-gradient(135deg, rgba(0, 212, 170, 0.25), rgba(108, 99, 255, 0.2));
+      border: 1px solid rgba(0, 212, 170, 0.4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      backdrop-filter: blur(10px);
+    }
+    @keyframes found-pulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 0.4; }
+    }
+    .found-label {
+      display: inline-block;
+      background: rgba(0, 212, 170, 0.12);
+      border: 1px solid rgba(0, 212, 170, 0.3);
+      color: var(--green);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 20px;
+    }
+    .found-title {
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+    .found-object {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    .found-message {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin: 24px 0;
+      font-style: italic;
+    }
+    .contact-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .contact-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 18px 24px;
+      border-radius: var(--radius-lg);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: var(--transition);
+      text-decoration: none;
+      color: white;
+    }
+    .contact-btn-whatsapp {
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      box-shadow: 0 4px 24px rgba(37, 211, 102, 0.3);
+    }
+    .contact-btn-whatsapp:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(37, 211, 102, 0.45);
+      color: white;
+    }
+    .contact-btn-email {
+      background: linear-gradient(135deg, #6c63ff, #4a43cc);
+      box-shadow: 0 4px 24px rgba(108, 99, 255, 0.3);
+    }
+    .contact-btn-email:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(108, 99, 255, 0.45);
+      color: white;
+    }
+    .contact-btn-icon { font-size: 1.4rem; }
+    .contact-note {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 20px;
+    }
+    .safetag-footer {
+      margin-top: 36px;
+      padding-top: 24px;
+      border-top: 1px solid var(--glass-border);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+    .safetag-footer a { color: var(--accent-light); font-weight: 500; }
+    /* Loading state */
+    .loading-state { text-align: center; padding: 80px 24px; }
+    /* Error state */
+    .error-state { text-align: center; padding: 60px 24px; }
+    .error-icon { font-size: 4rem; margin-bottom: 20px; }
+    .error-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 12px; }
+    .error-desc { color: var(--text-secondary); font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+  <div class="tag-page">
+    <div class="tag-public-card" id="tag-content">
+      <div class="loading-state">
+        <div class="spinner" style="margin: 0 auto 20px; width: 36px; height: 36px; border-width: 3px;"></div>
+        <p style="color: var(--text-secondary)">Buscando información del objeto...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Extraer el ID del tag de la URL
+    // La URL es /tag/XXXX pero el frontend sirve /tag.html y el backend maneja /tag/:id
+    // Aquí manejamos la carga a través del backend
+    const pathParts = window.location.pathname.split('/');
+    const tagId = pathParts[pathParts.length - 1] || '';
+
+    const container = document.getElementById('tag-content');
+
+    async function loadTagData() {
+      if (!tagId) {
+        showError('ID de tag inválido', 'No se encontró un ID de tag en la URL.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/tag/${tagId}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError('Tag no disponible', data.error || 'Este tag no existe o fue desactivado.');
+          return;
+        }
+
+        renderTag(data);
+      } catch (err) {
+        showError('Error de conexión', 'No se pudo conectar al servidor. Verifica tu conexión a internet.');
+      }
+    }
+
+    function renderTag(data) {
+      document.title = `Objeto encontrado: ${data.nombre_tag} — SafeTag`;
+      container.innerHTML = `
+        <div class="found-icon-wrap">
+          <div class="found-pulse"></div>
+          <div class="found-pulse"></div>
+          <div class="found-icon-core">🎒</div>
+        </div>
+
+        <div class="found-label">📍 Objeto Encontrado</div>
+        <h1 class="found-title">Hola, encontraste<br/>algo de ${escapeHtml(data.nombre_dueno)}</h1>
+        <p class="found-object">🏷️ ${escapeHtml(data.nombre_tag)}</p>
+
+        <div class="found-message">
+          "  ${escapeHtml(data.mensaje)}  "
+        </div>
+
+        <div class="contact-buttons">
+          <a
+            class="contact-btn contact-btn-whatsapp"
+            href="${data.contacto.whatsapp}"
+            target="_blank"
+            rel="noopener noreferrer"
+            id="btn-whatsapp"
+          >
+            <span class="contact-btn-icon">💬</span>
+            Contactar por WhatsApp
+          </a>
+          <a
+            class="contact-btn contact-btn-email"
+            href="${data.contacto.email}"
+            id="btn-email"
+          >
+            <span class="contact-btn-icon">✉️</span>
+            Enviar un correo electrónico
+          </a>
+        </div>
+
+        <p class="contact-note">
+          🔒 Tu privacidad está protegida — el número de teléfono y correo del dueño no se muestran directamente
+        </p>
+
+        <div class="safetag-footer">
+          Powered by <a href="/">SafeTag</a> · Tecnología NFC para equipaje inteligente
+        </div>
+      `;
+    }
+
+    function showError(title, desc) {
+      container.innerHTML = `
+        <div class="error-state">
+          <div class="error-icon">🔍</div>
+          <h2 class="error-title">${escapeHtml(title)}</h2>
+          <p class="error-desc">${escapeHtml(desc)}</p>
+          <br/>
+          <a href="/" class="btn btn-secondary" style="display:inline-flex; margin-top: 20px;">Ir al inicio</a>
+        </div>
+      `;
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.appendChild(document.createTextNode(str || ''));
+      return div.innerHTML;
+    }
+
+    loadTagData();
+  </script>
+</body>
+</html>

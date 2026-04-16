@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SafeTag — Tu equipaje siempre tiene voz para volver</title>
+  <meta name="description" content="SafeTag convierte tus mochilas y maletas en objetos inteligentes. Si se pierden, quien los encuentre puede contactarte fácilmente con un escaneo NFC." />
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    /* ── Landing specific ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 100px 0 80px;
+      position: relative;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(108, 99, 255, 0.12);
+      border: 1px solid rgba(108, 99, 255, 0.25);
+      border-radius: 100px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent-light);
+      margin-bottom: 28px;
+      animation: fadeInUp 0.6s ease;
+    }
+    .hero-title {
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 24px;
+      animation: fadeInUp 0.7s ease;
+    }
+    .hero-title .highlight {
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 40px;
+      max-width: 480px;
+      animation: fadeInUp 0.8s ease;
+    }
+    .hero-cta {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.9s ease;
+    }
+    .hero-visual {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: fadeInRight 0.8s ease;
+    }
+    .nfc-mockup {
+      position: relative;
+      width: 340px;
+      height: 340px;
+    }
+    .nfc-circle {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(108, 99, 255, 0.2);
+      animation: pulse-ring 3s ease-in-out infinite;
+    }
+    .nfc-circle:nth-child(1) { inset: 0; animation-delay: 0s; }
+    .nfc-circle:nth-child(2) { inset: 30px; animation-delay: 0.5s; border-color: rgba(0, 212, 170, 0.15); }
+    .nfc-circle:nth-child(3) { inset: 60px; animation-delay: 1s; }
+    .nfc-core {
+      position: absolute;
+      inset: 90px;
+      background: linear-gradient(135deg, rgba(108, 99, 255, 0.2), rgba(0, 212, 170, 0.15));
+      border-radius: 50%;
+      border: 1px solid rgba(108, 99, 255, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+    }
+    .nfc-icon { font-size: 4rem; }
+    @keyframes pulse-ring {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.04); opacity: 1; }
+    }
+    /* ── Features ── */
+    .features { padding: 100px 0; }
+    .section-header { text-align: center; margin-bottom: 64px; }
+    .section-tag {
+      display: inline-block;
+      background: rgba(108, 99, 255, 0.1);
+      color: var(--accent-light);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 16px;
+    }
+    .section-title { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.5px; }
+    .section-subtitle { color: var(--text-secondary); margin-top: 12px; font-size: 1rem; max-width: 500px; margin-left: auto; margin-right: auto; }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .feature-card {
+      padding: 32px 28px;
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      transition: var(--transition);
+    }
+    .feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-card); background: var(--bg-card-hover); }
+    .feature-icon {
+      width: 52px; height: 52px;
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+    }
+    .feature-icon.purple { background: rgba(108, 99, 255, 0.15); }
+    .feature-icon.green { background: rgba(0, 212, 170, 0.15); }
+    .feature-icon.yellow { background: rgba(255, 201, 77, 0.15); }
+    .feature-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
+    .feature-desc { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; }
+    /* ── How it works ── */
+    .how-it-works { padding: 100px 0; background: rgba(255,255,255,0.01); }
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; position: relative; padding-top: 24px; }
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 36px; left: 12.5%; right: 12.5%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--accent), var(--green), transparent);
+    }
+    .step { text-align: center; }
+    .step-number {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1rem;
+      margin: 0 auto 16px;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+    .step-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
+    .step-desc { font-size: 0.85rem; color: var(--text-secondary); }
+    /* ── CTA Final ── */
+    .cta-section {
+      padding: 100px 0;
+      text-align: center;
+    }
+    .cta-card {
+      background: linear-gradient(135deg, rgba(108, 99, 255, 0.12), rgba(0, 212, 170, 0.08));
+      border: 1px solid rgba(108, 99, 255, 0.3);
+      border-radius: var(--radius-xl);
+      padding: 64px;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-card::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: 50%; transform: translateX(-50%);
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(108, 99, 255, 0.1), transparent);
+    }
+    .cta-title { font-size: 2.4rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 16px; }
+    .cta-desc { color: var(--text-secondary); font-size: 1rem; margin-bottom: 36px; }
+    /* ── Footer ── */
+    .footer { padding: 32px 0; border-top: 1px solid var(--glass-border); text-align: center; color: var(--text-muted); font-size: 0.85rem; }
+    /* ── Animations ── */
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 60px; }
+      .hero-visual { display: none; }
+      .features-grid { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: repeat(2, 1fr); }
+      .steps::before { display: none; }
+      .cta-card { padding: 40px 24px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container">
+      <div class="navbar-inner">
+        <a href="/" class="logo">
+          <div class="logo-icon">🏷️</div>
+          SafeTag
+        </a>
+        <div class="nav-links" id="nav-links">
+          <a href="#como-funciona">¿Cómo funciona?</a>
+          <a href="#caracteristicas">Características</a>
+          <a href="login.html" class="btn btn-secondary btn-sm" id="nav-login">Iniciar sesión</a>
+          <a href="register.html" class="btn btn-primary btn-sm" id="nav-register">Comenzar gratis</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div>
+          <div class="hero-badge">
+            <span>📡</span> Tecnología NFC · Sin app necesaria
+          </div>
+          <h1 class="hero-title">
+            Tu mochila siempre<br/>
+            tiene voz para<br/>
+            <span class="highlight">volver a casa</span>
+          </h1>
+          <p class="hero-desc">
+            Agrega un chip NFC inteligente a tu equipaje de viaje.
+            Si se pierde, quien lo encuentre solo necesita escanear
+            el chip para contactarte instantáneamente.
+            <strong>Sin apps. Sin instalaciones.</strong>
+          </p>
+          <div class="hero-cta">
+            <a href="register.html" class="btn btn-primary">
+              🚀 Registrar mis tags
+            </a>
+            <a href="#como-funciona" class="btn btn-secondary">
+              Ver cómo funciona
+            </a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="nfc-mockup">
+            <div class="nfc-circle"></div>
+            <div class="nfc-circle"></div>
+            <div class="nfc-circle"></div>
+            <div class="nfc-core">
+              <span class="nfc-icon">📶</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="how-it-works" id="como-funciona">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Proceso simple</div>
+        <h2 class="section-title">Funciona en 4 pasos</h2>
+        <p class="section-subtitle">Desde que pegas el chip hasta recuperar tu maleta perdida</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-title">Compra tu chip</div>
+          <div class="step-desc">Recibes un chip NFC con ID único impreso listo para usar</div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-title">Regístrate</div>
+          <div class="step-desc">Crea tu cuenta y enlaza el chip a tus datos de contacto</div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-title">Pégalo a tu objeto</div>
+          <div class="step-desc">Coloca el chip en tu mochila, maleta o equipaje favorito</div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-title">¡Te devuelven!</div>
+          <div class="step-desc">Quien lo encuentra escanea el chip y puede contactarte al instante</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="caracteristicas">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Características</div>
+        <h2 class="section-title">Todo lo que necesitas</h2>
+        <p class="section-subtitle">Diseñado para ser simple para el que lo usa y seguro para el dueño</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon purple">🔒</div>
+          <div class="feature-title">Privacidad total</div>
+          <div class="feature-desc">Tu teléfono y email nunca se muestran en texto. Solo botones de contacto seguros que protegen tu información personal.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon green">📡</div>
+          <div class="feature-title">Sin apps necesarias</div>
+          <div class="feature-desc">Cualquier smartphone moderno puede escanear el chip directamente desde la cámara o ajustes. No hay nada que descargar.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon yellow">📊</div>
+          <div class="feature-title">Historial de escaneos</div>
+          <div class="feature-desc">Sabe cuándo y desde dónde fue escaneado tu tag. Recibe un registro completo de intentos de contacto.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon purple">🎛️</div>
+          <div class="feature-title">Múltiples objetos</div>
+          <div class="feature-desc">Registra tantos chips como quieras. Maletas, mochilas, maletines, cámaras — lo que sea que viajes.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon green">✏️</div>
+          <div class="feature-title">Actualiza tus datos</div>
+          <div class="feature-desc">¿Cambiaste de número? Actualiza tus datos en el panel y el chip refleja el cambio inmediatamente.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon yellow">🔗</div>
+          <div class="feature-title">Activa / Desactiva</div>
+          <div class="feature-desc">Si vendes o regalas un objeto, desactiva el chip con un clic. El nuevo dueño puede registrarlo a su nombre.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-card">
+        <h2 class="cta-title">¿Listo para viajar<br/>sin preocupaciones?</h2>
+        <p class="cta-desc">Registra tus chips NFC y protege tu equipaje hoy mismo. Es gratis y toma menos de 2 minutos.</p>
+        <a href="register.html" class="btn btn-primary" style="padding: 16px 40px; font-size: 1rem;">
+          🏷️ Crear mi cuenta gratis
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>© 2024 SafeTag · Tecnología NFC para equipaje de viaje · Diseñado con ❤️</p>
+    </div>
+  </footer>
+
+  <script>
+    // Auto-redirect si ya está logueado
+    const token = localStorage.getItem('safetag_token');
+    if (token) {
+      document.getElementById('nav-login').textContent = 'Mi panel';
+      document.getElementById('nav-login').href = 'dashboard.html';
+      document.getElementById('nav-register').textContent = 'Mis Tags';
+      document.getElementById('nav-register').href = 'dashboard.html';
+    }
+  </script>
+</body>
+</html>
