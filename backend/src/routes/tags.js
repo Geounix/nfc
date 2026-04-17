@@ -30,13 +30,23 @@ router.get('/', (req, res) => {
 // POST /api/tags — crear nuevo tag
 router.post('/', (req, res) => {
   try {
-    const { id, nombre_tag, nombre_dueno, telefono, email, mensaje } = req.body;
+    const {
+      id, nombre_tag, nombre_dueno, telefono, email, mensaje,
+      tipo, especie, raza, color_descripcion, edad, info_medica
+    } = req.body;
 
     if (!id || !nombre_tag || !nombre_dueno || !telefono || !email) {
       return res.status(400).json({ error: 'Faltan campos requeridos: id, nombre_tag, nombre_dueno, telefono, email.' });
     }
 
-    // Validar formato de ID (solo alfanumérico y guiones)
+    const tipoClean = (tipo === 'mascota') ? 'mascota' : 'objeto';
+
+    // Validar campos extra para mascotas
+    if (tipoClean === 'mascota' && !especie) {
+      return res.status(400).json({ error: 'Para mascotas, la especie es requerida (ej: Perro, Gato).' });
+    }
+
+    // Validar formato de ID
     const idClean = id.trim().toUpperCase();
     if (!/^[A-Z0-9\-_]{3,30}$/.test(idClean)) {
       return res.status(400).json({ error: 'El ID del tag solo puede contener letras, números, guiones o guiones bajos (3-30 caracteres).' });
@@ -44,15 +54,20 @@ router.post('/', (req, res) => {
 
     const db = getDb();
 
-    // Verificar que el tag no esté ya registrado
     const existingTag = db.prepare('SELECT id, user_id FROM tags WHERE id = ?').get(idClean);
     if (existingTag) {
       return res.status(409).json({ error: 'Este ID de tag ya está registrado por otro usuario.' });
     }
 
+    const defaultMsg = tipoClean === 'mascota'
+      ? '¡Hola! Encontraste a mi mascota. Por favor contáctame, te lo agradezco mucho 🐾'
+      : '¡Hola! Encontraste mi objeto. Por favor contáctame.';
+
     db.prepare(`
-      INSERT INTO tags (id, user_id, nombre_tag, nombre_dueno, telefono, email, mensaje, activo)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+      INSERT INTO tags
+        (id, user_id, nombre_tag, nombre_dueno, telefono, email, mensaje, activo,
+         tipo, especie, raza, color_descripcion, edad, info_medica)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?)
     `).run(
       idClean,
       req.user.id,
@@ -60,7 +75,13 @@ router.post('/', (req, res) => {
       nombre_dueno.trim(),
       telefono.trim(),
       email.toLowerCase().trim(),
-      mensaje ? mensaje.trim() : '¡Hola! Encontraste mi objeto. Por favor contáctame.'
+      mensaje ? mensaje.trim() : defaultMsg,
+      tipoClean,
+      especie ? especie.trim() : null,
+      raza ? raza.trim() : null,
+      color_descripcion ? color_descripcion.trim() : null,
+      edad ? edad.trim() : null,
+      info_medica ? info_medica.trim() : null
     );
 
     const newTag = db.prepare('SELECT * FROM tags WHERE id = ?').get(idClean);
@@ -82,24 +103,37 @@ router.put('/:id', (req, res) => {
       return res.status(404).json({ error: 'Tag no encontrado o no tienes permisos para editarlo.' });
     }
 
-    const { nombre_tag, nombre_dueno, telefono, email, mensaje, activo } = req.body;
+    const {
+      nombre_tag, nombre_dueno, telefono, email, mensaje, activo,
+      especie, raza, color_descripcion, edad, info_medica
+    } = req.body;
 
     db.prepare(`
       UPDATE tags SET
-        nombre_tag = COALESCE(?, nombre_tag),
-        nombre_dueno = COALESCE(?, nombre_dueno),
-        telefono = COALESCE(?, telefono),
-        email = COALESCE(?, email),
-        mensaje = COALESCE(?, mensaje),
-        activo = COALESCE(?, activo)
+        nombre_tag        = COALESCE(?, nombre_tag),
+        nombre_dueno      = COALESCE(?, nombre_dueno),
+        telefono          = COALESCE(?, telefono),
+        email             = COALESCE(?, email),
+        mensaje           = COALESCE(?, mensaje),
+        activo            = COALESCE(?, activo),
+        especie           = COALESCE(?, especie),
+        raza              = COALESCE(?, raza),
+        color_descripcion = COALESCE(?, color_descripcion),
+        edad              = COALESCE(?, edad),
+        info_medica       = COALESCE(?, info_medica)
       WHERE id = ? AND user_id = ?
     `).run(
-      nombre_tag ? nombre_tag.trim() : null,
-      nombre_dueno ? nombre_dueno.trim() : null,
-      telefono ? telefono.trim() : null,
-      email ? email.toLowerCase().trim() : null,
-      mensaje ? mensaje.trim() : null,
-      activo !== undefined ? (activo ? 1 : 0) : null,
+      nombre_tag        ? nombre_tag.trim()              : null,
+      nombre_dueno      ? nombre_dueno.trim()            : null,
+      telefono          ? telefono.trim()                : null,
+      email             ? email.toLowerCase().trim()     : null,
+      mensaje           ? mensaje.trim()                 : null,
+      activo !== undefined ? (activo ? 1 : 0)           : null,
+      especie           ? especie.trim()                 : null,
+      raza              ? raza.trim()                    : null,
+      color_descripcion ? color_descripcion.trim()       : null,
+      edad              ? edad.trim()                    : null,
+      info_medica       ? info_medica.trim()             : null,
       tagId,
       req.user.id
     );

@@ -215,7 +215,68 @@ body::before {
 .badge-active { background: rgba(0, 212, 170, 0.15); color: var(--green); }
 .badge-inactive { background: rgba(255, 90, 90, 0.12); color: var(--red); }
 .badge-scan { background: rgba(108, 99, 255, 0.15); color: var(--accent-light); }
+.badge-pet  { background: rgba(255, 150, 80, 0.15); color: #ff9650; }
+.badge-obj  { background: rgba(80, 180, 255, 0.15); color: #50b4ff; }
 .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+/* ── Type selector ────────────────────────────────────────────── */
+.type-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.type-option {
+  padding: 14px;
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: center;
+  transition: var(--transition);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+}
+.type-option:hover { border-color: var(--accent); color: var(--text-primary); }
+.type-option.selected-objeto {
+  border-color: #50b4ff;
+  background: rgba(80, 180, 255, 0.1);
+  color: #50b4ff;
+}
+.type-option.selected-mascota {
+  border-color: #ff9650;
+  background: rgba(255, 150, 80, 0.1);
+  color: #ff9650;
+}
+
+/* ── Pet info card (página pública) ──────────────────────────── */
+.pet-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 16px 0;
+}
+.pet-info-item {
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
+.pet-info-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.pet-info-value { font-size: 0.92rem; font-weight: 600; color: var(--text-primary); }
+.pet-medica-box {
+  background: rgba(255, 201, 77, 0.08);
+  border: 1px solid rgba(255, 201, 77, 0.25);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin: 10px 0;
+  font-size: 0.88rem;
+  color: var(--yellow);
+  line-height: 1.6;
+}
+
 
 /* ── Alert / messages ────────────────────────────────────────── */
 .alert {

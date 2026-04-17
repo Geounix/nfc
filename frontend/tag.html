@@ -188,17 +188,61 @@
     }
 
     function renderTag(data) {
-      document.title = `Objeto encontrado: ${data.nombre_tag} — SafeTag`;
+      const esMascota = data.tipo === 'mascota';
+      document.title = esMascota
+        ? `🐾 Mascota encontrada: ${data.nombre_tag} — SafeTag`
+        : `Objeto encontrado: ${data.nombre_tag} — SafeTag`;
+
+      // Bloque de info de mascota
+      let petBlock = '';
+      if (esMascota && data.mascota) {
+        const m = data.mascota;
+        const infoItems = [
+          m.especie           ? { label: 'Especie',  value: m.especie }           : null,
+          m.raza              ? { label: 'Raza',     value: m.raza }              : null,
+          m.color_descripcion ? { label: 'Color',    value: m.color_descripcion } : null,
+          m.edad              ? { label: 'Edad',     value: m.edad }              : null,
+        ].filter(Boolean);
+
+        const infoGrid = infoItems.length > 0 ? `
+          <div class="pet-info-grid">
+            ${infoItems.map(i => `
+              <div class="pet-info-item">
+                <div class="pet-info-label">${escapeHtml(i.label)}</div>
+                <div class="pet-info-value">${escapeHtml(i.value)}</div>
+              </div>
+            `).join('')}
+          </div>
+        ` : '';
+
+        const medicaBlock = m.info_medica ? `
+          <div class="pet-medica-box">
+            ⚕️ <strong>Info médica:</strong> ${escapeHtml(m.info_medica)}
+          </div>
+        ` : '';
+
+        petBlock = infoGrid + medicaBlock;
+      }
+
       container.innerHTML = `
         <div class="found-icon-wrap">
           <div class="found-pulse"></div>
           <div class="found-pulse"></div>
-          <div class="found-icon-core">🎒</div>
+          <div class="found-icon-core">${esMascota ? '🐾' : '🎒'}</div>
         </div>
 
-        <div class="found-label">📍 Objeto Encontrado</div>
-        <h1 class="found-title">Hola, encontraste<br/>algo de ${escapeHtml(data.nombre_dueno)}</h1>
-        <p class="found-object">🏷️ ${escapeHtml(data.nombre_tag)}</p>
+        <div class="found-label">${esMascota ? '🐾 Mascota Encontrada' : '📍 Objeto Encontrado'}</div>
+        <h1 class="found-title">
+          ${esMascota
+            ? `Hola, encontraste<br/>a <strong>${escapeHtml(data.nombre_tag)}</strong>`
+            : `Hola, encontraste<br/>algo de ${escapeHtml(data.nombre_dueno)}`
+          }
+        </h1>
+        <p class="found-object">
+          ${esMascota ? `👤 Dueño: ${escapeHtml(data.nombre_dueno)}` : `🏷️ ${escapeHtml(data.nombre_tag)}`}
+        </p>
+
+        ${petBlock}
 
         <div class="found-message">
           "  ${escapeHtml(data.mensaje)}  "
@@ -230,10 +274,11 @@
         </p>
 
         <div class="safetag-footer">
-          Powered by <a href="/">SafeTag</a> · Tecnología NFC para equipaje inteligente
+          Powered by <a href="/">SafeTag</a> · Tecnología NFC para equipaje y mascotas
         </div>
       `;
     }
+
 
     function showError(title, desc) {
       container.innerHTML = `

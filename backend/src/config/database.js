@@ -11,6 +11,7 @@ function getDb() {
     db.pragma('journal_mode = WAL');
     db.pragma('foreign_keys = ON');
     initializeSchema();
+    runMigrations();
   }
   return db;
 }
@@ -32,7 +33,7 @@ function initializeSchema() {
       nombre_dueno TEXT NOT NULL,
       telefono TEXT NOT NULL,
       email TEXT NOT NULL,
-      mensaje TEXT DEFAULT '¡Hola! Encontraste mi objeto. Por favor contáctame.',
+      mensaje TEXT DEFAULT '¡Hola! Por favor contáctame.',
       activo INTEGER DEFAULT 1,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -50,6 +51,32 @@ function initializeSchema() {
     );
   `);
   console.log('✅ Base de datos SQLite inicializada correctamente');
+}
+
+// Migraciones seguras — solo agregan columnas si no existen
+function runMigrations() {
+  const existingCols = db.prepare(`PRAGMA table_info(tags)`).all().map(c => c.name);
+
+  const petColumns = [
+    { name: 'tipo',              sql: `ALTER TABLE tags ADD COLUMN tipo TEXT DEFAULT 'objeto'` },
+    { name: 'especie',           sql: `ALTER TABLE tags ADD COLUMN especie TEXT` },
+    { name: 'raza',              sql: `ALTER TABLE tags ADD COLUMN raza TEXT` },
+    { name: 'color_descripcion', sql: `ALTER TABLE tags ADD COLUMN color_descripcion TEXT` },
+    { name: 'edad',              sql: `ALTER TABLE tags ADD COLUMN edad TEXT` },
+    { name: 'info_medica',       sql: `ALTER TABLE tags ADD COLUMN info_medica TEXT` },
+  ];
+
+  let migrated = 0;
+  for (const col of petColumns) {
+    if (!existingCols.includes(col.name)) {
+      db.exec(col.sql);
+      migrated++;
+    }
+  }
+
+  if (migrated > 0) {
+    console.log(`🔄 Migración: ${migrated} columna(s) de mascotas agregadas a la tabla tags`);
+  }
 }
 
 module.exports = { getDb };

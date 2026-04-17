@@ -223,15 +223,29 @@
 
       <form id="tag-form" novalidate>
         <input type="hidden" id="tag-edit-id" value="" />
+        <input type="hidden" id="tag-tipo" value="objeto" />
+
+        <!-- Selector de tipo -->
+        <div class="form-group" id="group-tipo">
+          <label class="form-label">¿Qué quieres proteger? <span style="color: var(--red)">*</span></label>
+          <div class="type-selector">
+            <button type="button" class="type-option selected-objeto" id="tipo-objeto" onclick="selectTipo('objeto')">
+              🎒 Objeto / Equipaje
+            </button>
+            <button type="button" class="type-option" id="tipo-mascota" onclick="selectTipo('mascota')">
+              🐾 Mascota
+            </button>
+          </div>
+        </div>
 
         <div class="form-group">
           <label class="form-label" for="tag-id">ID del Chip NFC <span style="color: var(--red)">*</span></label>
-          <input class="form-input" type="text" id="tag-id" placeholder="Ej: ST-001A o el código impreso en el chip" required />
+          <input class="form-input" type="text" id="tag-id" placeholder="Ej: ST-001A — el código impreso en el chip" required />
           <div class="form-hint">Este código está impreso en el chip físico que recibiste.</div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="tag-nombre">Nombre del objeto <span style="color: var(--red)">*</span></label>
+          <label class="form-label" for="tag-nombre" id="label-nombre">Nombre del objeto <span style="color: var(--red)">*</span></label>
           <input class="form-input" type="text" id="tag-nombre" placeholder="Ej: Mi mochila negra de viaje" required />
         </div>
 
@@ -243,18 +257,50 @@
           <div class="form-group" style="margin-bottom:0">
             <label class="form-label" for="tag-telefono">WhatsApp <span style="color: var(--red)">*</span></label>
             <input class="form-input" type="tel" id="tag-telefono" placeholder="Ej: +50688889999" required />
-            <div class="form-hint">Con código de país (nunca se mostrará en texto)</div>
+            <div class="form-hint">Con código de país (nunca visible en texto)</div>
           </div>
         </div>
 
         <div class="form-group" style="margin-top: 16px">
           <label class="form-label" for="tag-email">Correo de contacto <span style="color: var(--red)">*</span></label>
-          <input class="form-input" type="email" id="tag-email" placeholder="tu@correo.com (nunca se mostrará en texto)" required />
+          <input class="form-input" type="email" id="tag-email" placeholder="tu@correo.com (nunca visible en texto)" required />
+        </div>
+
+        <!-- Campos específicos de mascota (ocultos por defecto) -->
+        <div id="pet-fields" style="display:none">
+          <div style="border-top: 1px solid var(--glass-border); margin: 20px 0 20px; padding-top: 20px;">
+            <p style="font-size:0.82rem; color: var(--text-muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">🐾 Información de la mascota</p>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" for="tag-especie">Especie <span style="color: var(--red)">*</span></label>
+              <input class="form-input" type="text" id="tag-especie" placeholder="Ej: Perro, Gato, Conejo..." />
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" for="tag-raza">Raza</label>
+              <input class="form-input" type="text" id="tag-raza" placeholder="Ej: Golden Retriever" />
+            </div>
+          </div>
+          <div class="form-row" style="margin-top: 14px">
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" for="tag-color">Color / Descripción física</label>
+              <input class="form-input" type="text" id="tag-color" placeholder="Ej: dorado, collar rojo" />
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" for="tag-edad">Edad</label>
+              <input class="form-input" type="text" id="tag-edad" placeholder="Ej: 3 años, 8 meses" />
+            </div>
+          </div>
+          <div class="form-group" style="margin-top: 14px">
+            <label class="form-label" for="tag-medica">⚕️ Información médica relevante</label>
+            <textarea class="form-textarea" id="tag-medica" placeholder="Ej: Alérgico al pollo. Toma medicamento X cada 12h. Vacunas al día." style="min-height:80px"></textarea>
+            <div class="form-hint">Esta información puede ser importante en caso de emergencia.</div>
+          </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="tag-mensaje">Mensaje para quien encuentre tu objeto</label>
-          <textarea class="form-textarea" id="tag-mensaje" placeholder="¡Hola! Encontraste mi mochila. Por favor contáctame, te lo agradezco mucho 🙏"></textarea>
+          <label class="form-label" for="tag-mensaje" id="label-mensaje">Mensaje para quien encuentre tu objeto</label>
+          <textarea class="form-textarea" id="tag-mensaje" placeholder="¡Hola! Encontraste mi mochila. Por favor contáctame 🙏"></textarea>
         </div>
 
         <button type="submit" class="btn btn-primary btn-full" id="btn-save-tag">
@@ -263,6 +309,7 @@
       </form>
     </div>
   </div>
+
 
   <!-- Modal: Historial de Escaneos -->
   <div class="modal-overlay" id="modal-scans">

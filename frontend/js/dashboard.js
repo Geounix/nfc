@@ -1,4 +1,4 @@
-// dashboard.js — Lógica completa del panel de gestión de tags
+// dashboard.js — Lógica completa del panel de gestión de tags (con soporte de mascotas)
 
 document.addEventListener('DOMContentLoaded', () => {
   // ── Auth guard ───────────────────────────────────────────────────
@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const tagForm = document.getElementById('tag-form');
   const btnSaveTag = document.getElementById('btn-save-tag');
   const tagEditId = document.getElementById('tag-edit-id');
+  const tagTipoInput = document.getElementById('tag-tipo');
   const modalAlertError = document.getElementById('modal-alert-error');
   const modalErrorMsg = document.getElementById('modal-error-msg');
   const modalAlertSuccess = document.getElementById('modal-alert-success');
@@ -41,6 +42,36 @@ document.addEventListener('DOMContentLoaded', () => {
     userName.textContent = user.nombre;
     userEmail.textContent = user.email;
   }
+
+  // ── Tipo selector (global, visible desde HTML onclick) ───────────
+  window.selectTipo = function(tipo) {
+    tagTipoInput.value = tipo;
+    const petFields = document.getElementById('pet-fields');
+    const labelNombre = document.getElementById('label-nombre');
+    const labelMensaje = document.getElementById('label-mensaje');
+    const inputNombre = document.getElementById('tag-nombre');
+    const inputMensaje = document.getElementById('tag-mensaje');
+    const btnObjeto = document.getElementById('tipo-objeto');
+    const btnMascota = document.getElementById('tipo-mascota');
+
+    if (tipo === 'mascota') {
+      petFields.style.display = 'block';
+      labelNombre.innerHTML = 'Nombre de la mascota <span style="color: var(--red)">*</span>';
+      labelMensaje.textContent = 'Mensaje para quien encuentre a tu mascota';
+      inputNombre.placeholder = 'Ej: Max, Luna, Rocky...';
+      inputMensaje.placeholder = '¡Hola! Encontraste a mi mascota. Por favor contáctame 🐾';
+      btnObjeto.className = 'type-option';
+      btnMascota.className = 'type-option selected-mascota';
+    } else {
+      petFields.style.display = 'none';
+      labelNombre.innerHTML = 'Nombre del objeto <span style="color: var(--red)">*</span>';
+      labelMensaje.textContent = 'Mensaje para quien encuentre tu objeto';
+      inputNombre.placeholder = 'Ej: Mi mochila negra de viaje';
+      inputMensaje.placeholder = '¡Hola! Encontraste mi mochila. Por favor contáctame 🙏';
+      btnObjeto.className = 'type-option selected-objeto';
+      btnMascota.className = 'type-option';
+    }
+  };
 
   // ── Load tags ────────────────────────────────────────────────────
   let allTags = [];
@@ -76,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="empty-state">
           <div class="empty-state-icon">🏷️</div>
           <h3>Sin tags registrados</h3>
-          <p>Agrega tu primer chip NFC para empezar a proteger tu equipaje.</p>
+          <p>Agrega tu primer chip NFC para empezar a proteger tu equipaje o mascota.</p>
           <button class="btn btn-primary" id="empty-new-tag">+ Agregar mi primer tag</button>
         </div>`;
       document.getElementById('empty-new-tag')?.addEventListener('click', () => openCreateModal());
@@ -101,6 +132,22 @@ document.addEventListener('DOMContentLoaded', () => {
       : 'Nunca';
 
     const tagUrl = `${window.location.origin}/tag/${tag.id}`;
+    const esMascota = tag.tipo === 'mascota';
+
+    // Badge de tipo
+    const typeBadge = esMascota
+      ? `<span class="badge badge-pet">🐾 Mascota</span>`
+      : `<span class="badge badge-obj">🎒 Objeto</span>`;
+
+    // Info extra de mascota
+    const petExtra = esMascota ? `
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px">
+        ${tag.especie ? `<span style="font-size:0.78rem; background:rgba(255,150,80,0.1); color:#ff9650; padding:3px 10px; border-radius:100px">${escapeHtml(tag.especie)}</span>` : ''}
+        ${tag.raza ? `<span style="font-size:0.78rem; background:rgba(255,255,255,0.05); color:var(--text-muted); padding:3px 10px; border-radius:100px">${escapeHtml(tag.raza)}</span>` : ''}
+        ${tag.color_descripcion ? `<span style="font-size:0.78rem; background:rgba(255,255,255,0.05); color:var(--text-muted); padding:3px 10px; border-radius:100px">🎨 ${escapeHtml(tag.color_descripcion)}</span>` : ''}
+        ${tag.edad ? `<span style="font-size:0.78rem; background:rgba(255,255,255,0.05); color:var(--text-muted); padding:3px 10px; border-radius:100px">📅 ${escapeHtml(tag.edad)}</span>` : ''}
+      </div>
+    ` : '';
 
     return `
       <div class="tag-card ${!tag.activo ? 'inactive' : ''}" id="tag-card-${tag.id}">
@@ -109,8 +156,10 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="tag-id-display">ID: ${escapeHtml(tag.id)}</div>
             <div class="tag-name" style="margin-top:8px">${escapeHtml(tag.nombre_tag)}</div>
             <div class="tag-owner">👤 ${escapeHtml(tag.nombre_dueno)}</div>
+            ${petExtra}
           </div>
-          <div>
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px">
+            ${typeBadge}
             <span class="badge ${tag.activo ? 'badge-active' : 'badge-inactive'}">
               <span class="badge-dot"></span>
               ${tag.activo ? 'Activo' : 'Inactivo'}
@@ -172,23 +221,41 @@ document.addEventListener('DOMContentLoaded', () => {
   function openCreateModal() {
     tagEditId.value = '';
     tagForm.reset();
+    tagTipoInput.value = 'objeto';
     document.getElementById('tag-id').disabled = false;
+    document.getElementById('group-tipo').style.display = 'block';
     modalTitle.textContent = '➕ Nuevo Tag NFC';
     btnSaveTag.textContent = 'Guardar Tag';
+    selectTipo('objeto'); // reset UI
     clearModalAlerts();
     modalTag.classList.add('open');
   }
 
   function openEditModal(tag) {
     tagEditId.value = tag.id;
+    tagTipoInput.value = tag.tipo || 'objeto';
     document.getElementById('tag-id').value = tag.id;
     document.getElementById('tag-id').disabled = true;
+    document.getElementById('group-tipo').style.display = 'none'; // no cambiar tipo al editar
     document.getElementById('tag-nombre').value = tag.nombre_tag;
     document.getElementById('tag-dueno').value = tag.nombre_dueno;
     document.getElementById('tag-telefono').value = tag.telefono;
     document.getElementById('tag-email').value = tag.email;
     document.getElementById('tag-mensaje').value = tag.mensaje || '';
-    modalTitle.textContent = '✏️ Editar Tag';
+
+    // Campos mascota
+    if (tag.tipo === 'mascota') {
+      selectTipo('mascota');
+      document.getElementById('tag-especie').value = tag.especie || '';
+      document.getElementById('tag-raza').value = tag.raza || '';
+      document.getElementById('tag-color').value = tag.color_descripcion || '';
+      document.getElementById('tag-edad').value = tag.edad || '';
+      document.getElementById('tag-medica').value = tag.info_medica || '';
+    } else {
+      selectTipo('objeto');
+    }
+
+    modalTitle.textContent = tag.tipo === 'mascota' ? '🐾 Editar Mascota' : '✏️ Editar Objeto';
     btnSaveTag.textContent = 'Guardar cambios';
     clearModalAlerts();
     modalTag.classList.add('open');
@@ -198,7 +265,10 @@ document.addEventListener('DOMContentLoaded', () => {
     modalTag.classList.remove('open');
     tagForm.reset();
     tagEditId.value = '';
+    tagTipoInput.value = 'objeto';
     document.getElementById('tag-id').disabled = false;
+    document.getElementById('group-tipo').style.display = 'block';
+    selectTipo('objeto');
   }
 
   function clearModalAlerts() {
@@ -222,15 +292,28 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     const editingId = tagEditId.value;
     const isEditing = !!editingId;
+    const tipo = tagTipoInput.value;
 
     const body = {
       id: document.getElementById('tag-id').value.trim(),
+      tipo,
       nombre_tag: document.getElementById('tag-nombre').value.trim(),
       nombre_dueno: document.getElementById('tag-dueno').value.trim(),
       telefono: document.getElementById('tag-telefono').value.trim(),
       email: document.getElementById('tag-email').value.trim(),
       mensaje: document.getElementById('tag-mensaje').value.trim()
     };
+
+    // Campos de mascota
+    if (tipo === 'mascota') {
+      body.especie = document.getElementById('tag-especie').value.trim();
+      body.raza = document.getElementById('tag-raza').value.trim();
+      body.color_descripcion = document.getElementById('tag-color').value.trim();
+      body.edad = document.getElementById('tag-edad').value.trim();
+      body.info_medica = document.getElementById('tag-medica').value.trim();
+
+      if (!body.especie) return showModalError('La especie de tu mascota es requerida.');
+    }
 
     if (!body.nombre_tag || !body.nombre_dueno || !body.telefono || !body.email) {
       return showModalError('Por favor completa todos los campos requeridos.');
@@ -295,7 +378,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Delete tag ────────────────────────────────────────────────────
   async function deleteTag(tag) {
-    if (!confirm(`¿Eliminar el tag "${tag.nombre_tag}"? Esta acción no se puede deshacer.`)) return;
+    const nombre = tag.tipo === 'mascota' ? `la mascota "${tag.nombre_tag}"` : `el tag "${tag.nombre_tag}"`;
+    if (!confirm(`¿Eliminar ${nombre}? Esta acción no se puede deshacer.`)) return;
 
     try {
       const res = await SafeTagAuth.apiRequest(`/api/tags/${tag.id}`, { method: 'DELETE' });
@@ -397,11 +481,9 @@ document.addEventListener('DOMContentLoaded', () => {
   modalClose?.addEventListener('click', closeTagModal);
   modalScansClose?.addEventListener('click', () => modalScans.classList.remove('open'));
 
-  // Close modals on backdrop click
   modalTag.addEventListener('click', (e) => { if (e.target === modalTag) closeTagModal(); });
   modalScans.addEventListener('click', (e) => { if (e.target === modalScans) modalScans.classList.remove('open'); });
 
-  // ESC to close
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeTagModal();

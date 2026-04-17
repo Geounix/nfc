@@ -3,16 +3,16 @@ const { getDb } = require('../config/database');
 
 const router = express.Router();
 
-// GET /tag/:id — Página pública del tag (lo que ve quien encuentra el objeto)
+// GET /api/tag/:id — Datos públicos del tag (JSON para el frontend)
 router.get('/:id', (req, res) => {
   try {
     const tagId = req.params.id.toUpperCase();
     const db = getDb();
 
     const tag = db.prepare(`
-      SELECT t.id, t.nombre_dueno, t.telefono, t.email, t.mensaje, t.activo, t.nombre_tag
-      FROM tags t
-      WHERE t.id = ?
+      SELECT id, nombre_dueno, telefono, email, mensaje, activo, nombre_tag,
+             tipo, especie, raza, color_descripcion, edad, info_medica
+      FROM tags WHERE id = ?
     `).get(tagId);
 
     if (!tag) {
@@ -23,43 +23,54 @@ router.get('/:id', (req, res) => {
       return res.status(403).json({ error: 'Este tag ha sido desactivado por su dueño.' });
     }
 
-    // Registrar el escaneo
+    // Registrar escaneo
     const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'desconocida';
     const userAgent = req.headers['user-agent'] || 'desconocido';
 
-    // Intentar geolocalización por IP (gratuita, sin API key)
-    let pais = 'Desconocido';
-    let ciudad = 'Desconocida';
-
-    try {
-      // Solo para IPs públicas (no localhost)
-      if (!ip.includes('127.0.0.1') && !ip.includes('::1') && !ip.includes('192.168') && !ip.includes('10.')) {
-        const geoRes = require('https');
-        // Usamos un servicio gratuito async — guardamos el escaneo sin esperar
-      }
-    } catch (geoErr) {
-      // Silencioso — la geo es opcional
-    }
-
     db.prepare(`
       INSERT INTO scans (tag_id, ip, user_agent, pais, ciudad)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(tagId, ip, userAgent, pais, ciudad);
+      VALUES (?, ?, ?, 'Desconocido', 'Desconocida')
+    `).run(tagId, ip, userAgent);
 
-    // NUNCA devolver teléfono o email en texto plano
-    // Solo se generan los links de contacto en servidor
-    const whatsappLink = `https://wa.me/${tag.telefono.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola! Encontré tu objeto "${tag.nombre_tag}" y quiero devolvértelo. 🙏`)}`;
-    const emailLink = `mailto:${tag.email}?subject=${encodeURIComponent(`Encontré tu objeto: ${tag.nombre_tag}`)}&body=${encodeURIComponent(`Hola ${tag.nombre_dueno},\n\nEncontré tu objeto "${tag.nombre_tag}" y quiero devolvértelo.\n\n¡Escríbeme para coordinar!`)}`;
+    const esMascota = tag.tipo === 'mascota';
 
-    res.json({
+    // Links de contacto — nunca exponen el dato real
+    const whatsappText = esMascota
+      ? `¡Hola! Encontré a tu mascota "${tag.nombre_tag}" y quiero devolvértela. 🐾`
+      : `¡Hola! Encontré tu objeto "${tag.nombre_tag}" y quiero devolvértelo. 🙏`;
+
+    const emailSubject = esMascota
+      ? `Encontré a tu mascota: ${tag.nombre_tag}`
+      : `Encontré tu objeto: ${tag.nombre_tag}`;
+
+    const emailBody = esMascota
+      ? `Hola ${tag.nombre_dueno},\n\nEncontré a tu mascota "${tag.nombre_tag}" y quiero devolvértela.\n\n¡Escríbeme para coordinar la devolución!`
+      : `Hola ${tag.nombre_dueno},\n\nEncontré tu objeto "${tag.nombre_tag}" y quiero devolvértelo.\n\n¡Escríbeme para coordinar!`;
+
+    const whatsappLink = `https://wa.me/${tag.telefono.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappText)}`;
+    const emailLink   = `mailto:${tag.email}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+
+    // Respuesta base
+    const response = {
+      tipo: tag.tipo || 'objeto',
       nombre_dueno: tag.nombre_dueno,
       nombre_tag: tag.nombre_tag,
       mensaje: tag.mensaje,
-      contacto: {
-        whatsapp: whatsappLink,
-        email: emailLink
-      }
-    });
+      contacto: { whatsapp: whatsappLink, email: emailLink }
+    };
+
+    // Agregar info pública de mascota (datos no sensibles)
+    if (esMascota) {
+      response.mascota = {
+        especie:           tag.especie,
+        raza:              tag.raza,
+        color_descripcion: tag.color_descripcion,
+        edad:              tag.edad,
+        info_medica:       tag.info_medica
+      };
+    }
+
+    res.json(response);
   } catch (err) {
     console.error('Error en página pública:', err);
     res.status(500).json({ error: 'Error interno del servidor.' });
