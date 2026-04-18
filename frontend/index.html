@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SafeTag — Tu equipaje siempre tiene voz para volver</title>
-  <meta name="description" content="SafeTag convierte tus mochilas y maletas en objetos inteligentes. Si se pierden, quien los encuentre puede contactarte fácilmente con un escaneo NFC." />
+  <title>SafeTag — Tu equipaje y mascotas siempre tienen forma de volver</title>
+  <meta name="description" content="SafeTag usa chips NFC para proteger mochilas, maletas y mascotas. Si se pierden, quien los encuentre puede contactarte al instante. Sin apps." />
   <link rel="stylesheet" href="css/styles.css" />
   <style>
     /* ── Landing specific ── */
@@ -25,10 +25,10 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(108, 99, 255, 0.12);
-      border: 1px solid rgba(108, 99, 255, 0.25);
+      background: rgba(139,92,246,0.15);
+      border: 1px solid rgba(139,92,246,0.35);
       border-radius: 100px;
-      padding: 6px 14px;
+      padding: 6px 16px;
       font-size: 0.8rem;
       font-weight: 600;
       color: var(--accent-light);
@@ -44,7 +44,13 @@
       animation: fadeInUp 0.7s ease;
     }
     .hero-title .highlight {
-      background: linear-gradient(135deg, var(--accent), var(--green));
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-title .highlight-cyan {
+      background: var(--green-gradient);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -63,48 +69,85 @@
       flex-wrap: wrap;
       animation: fadeInUp 0.9s ease;
     }
+    /* Dual visual cards */
     .hero-visual {
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
       animation: fadeInRight 0.8s ease;
     }
-    .nfc-mockup {
+    .hero-float-card {
+      background: rgba(139,92,246,0.08);
+      border: 1px solid rgba(139,92,246,0.25);
+      border-radius: var(--radius-lg);
+      padding: 24px 20px;
+      text-align: center;
+      backdrop-filter: blur(12px);
       position: relative;
-      width: 340px;
-      height: 340px;
+      overflow: hidden;
     }
-    .nfc-circle {
+    .hero-float-card::before {
+      content: '';
       position: absolute;
-      border-radius: 50%;
-      border: 1px solid rgba(108, 99, 255, 0.2);
-      animation: pulse-ring 3s ease-in-out infinite;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(139,92,246,0.1), transparent 70%);
     }
-    .nfc-circle:nth-child(1) { inset: 0; animation-delay: 0s; }
-    .nfc-circle:nth-child(2) { inset: 30px; animation-delay: 0.5s; border-color: rgba(0, 212, 170, 0.15); }
-    .nfc-circle:nth-child(3) { inset: 60px; animation-delay: 1s; }
-    .nfc-core {
-      position: absolute;
-      inset: 90px;
-      background: linear-gradient(135deg, rgba(108, 99, 255, 0.2), rgba(0, 212, 170, 0.15));
-      border-radius: 50%;
-      border: 1px solid rgba(108, 99, 255, 0.4);
+    .hero-float-card.pet {
+      background: rgba(251,146,60,0.08);
+      border-color: rgba(251,146,60,0.25);
+    }
+    .hero-float-card.pet::before {
+      background: radial-gradient(circle at top, rgba(251,146,60,0.1), transparent 70%);
+    }
+    .float-icon { font-size: 2.5rem; margin-bottom: 12px; display: block; }
+    .float-label { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); display: block; margin-bottom: 6px; }
+    .float-sub { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.5; }
+    .float-badge {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .float-badge.purple { background: rgba(139,92,246,0.2); color: #A78BFA; }
+    .float-badge.orange { background: rgba(251,146,60,0.2); color: #FB923C; }
+    /* NFC pulse — top card spanning both columns */
+    .hero-nfc-pulse {
+      grid-column: span 2;
+      background: rgba(6,182,212,0.06);
+      border: 1px solid rgba(6,182,212,0.2);
+      border-radius: var(--radius-lg);
+      padding: 20px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(10px);
+      gap: 16px;
+      backdrop-filter: blur(12px);
     }
-    .nfc-icon { font-size: 4rem; }
+    .pulse-dot {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: rgba(6,182,212,0.15);
+      border: 1px solid rgba(6,182,212,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      animation: pulse-ring 2s ease-in-out infinite;
+    }
     @keyframes pulse-ring {
-      0%, 100% { transform: scale(1); opacity: 0.6; }
-      50% { transform: scale(1.04); opacity: 1; }
+      0%,100% { box-shadow: 0 0 0 0 rgba(6,182,212,0.3); }
+      50% { box-shadow: 0 0 0 10px rgba(6,182,212,0); }
     }
-    /* ── Features ── */
+    .pulse-text .t1 { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); }
+    .pulse-text .t2 { font-size: 0.75rem; color: var(--text-secondary); }
+
+    /* ── Sections ── */
     .features { padding: 100px 0; }
     .section-header { text-align: center; margin-bottom: 64px; }
     .section-tag {
       display: inline-block;
-      background: rgba(108, 99, 255, 0.1);
+      background: rgba(139,92,246,0.12);
+      border: 1px solid rgba(139,92,246,0.25);
       color: var(--accent-light);
       font-size: 0.8rem;
       font-weight: 600;
@@ -116,88 +159,154 @@
     }
     .section-title { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.5px; }
     .section-subtitle { color: var(--text-secondary); margin-top: 12px; font-size: 1rem; max-width: 500px; margin-left: auto; margin-right: auto; }
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-    }
+
+    /* ── Features grid ── */
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
     .feature-card {
-      padding: 32px 28px;
+      padding: 28px 24px;
       background: var(--bg-card);
       border: 1px solid var(--glass-border);
       border-radius: var(--radius-lg);
       transition: var(--transition);
+      position: relative;
+      overflow: hidden;
     }
     .feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-card); background: var(--bg-card-hover); }
+    .feature-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent-gradient);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    .feature-card:hover::after { opacity: 1; }
     .feature-icon {
-      width: 52px; height: 52px;
+      width: 48px; height: 48px;
       border-radius: var(--radius-md);
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.6rem;
-      margin-bottom: 20px;
+      font-size: 1.5rem;
+      margin-bottom: 18px;
     }
-    .feature-icon.purple { background: rgba(108, 99, 255, 0.15); }
-    .feature-icon.green { background: rgba(0, 212, 170, 0.15); }
-    .feature-icon.yellow { background: rgba(255, 201, 77, 0.15); }
-    .feature-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
-    .feature-desc { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; }
+    .feature-icon.violet { background: rgba(139,92,246,0.15); }
+    .feature-icon.cyan { background: rgba(6,182,212,0.15); }
+    .feature-icon.orange { background: rgba(251,146,60,0.15); }
+    .feature-icon.magenta { background: rgba(217,70,239,0.15); }
+    .feature-icon.blue { background: rgba(59,130,246,0.15); }
+    .feature-icon.red { background: rgba(244,63,94,0.15); }
+    .feature-title { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .feature-desc { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.65; }
+
+    /* ── Use cases (dual) ── */
+    .use-cases { padding: 100px 0; background: rgba(139,92,246,0.03); }
+    .use-cases-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 48px; }
+    .usecase-card {
+      border-radius: var(--radius-xl);
+      padding: 40px 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    .usecase-card.luggage {
+      background: rgba(139,92,246,0.08);
+      border: 1px solid rgba(139,92,246,0.25);
+    }
+    .usecase-card.pets {
+      background: rgba(251,146,60,0.08);
+      border: 1px solid rgba(251,146,60,0.25);
+    }
+    .usecase-emoji { font-size: 3rem; display: block; margin-bottom: 20px; }
+    .usecase-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.3px; }
+    .usecase-title.violet { background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .usecase-title.orange { background: linear-gradient(135deg, #FB923C, #EF4444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .usecase-desc { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; margin-bottom: 20px; }
+    .usecase-items { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .usecase-items li { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; color: var(--text-secondary); }
+    .usecase-items li::before { content: '✓'; font-weight: 700; color: var(--accent-light); }
+    .usecase-card.pets .usecase-items li::before { color: #FB923C; }
+
     /* ── How it works ── */
-    .how-it-works { padding: 100px 0; background: rgba(255,255,255,0.01); }
+    .how-it-works { padding: 100px 0; }
     .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; position: relative; padding-top: 24px; }
     .steps::before {
       content: '';
       position: absolute;
       top: 36px; left: 12.5%; right: 12.5%;
       height: 1px;
-      background: linear-gradient(to right, transparent, var(--accent), var(--green), transparent);
+      background: linear-gradient(to right, transparent, var(--accent), var(--accent-2), transparent);
     }
     .step { text-align: center; }
     .step-number {
       width: 48px; height: 48px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      background: var(--accent-gradient);
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       font-weight: 800; font-size: 1rem;
       margin: 0 auto 16px;
-      box-shadow: 0 0 20px var(--accent-glow);
+      box-shadow: 0 0 24px rgba(139,92,246,0.4);
     }
     .step-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
-    .step-desc { font-size: 0.85rem; color: var(--text-secondary); }
-    /* ── CTA Final ── */
-    .cta-section {
-      padding: 100px 0;
-      text-align: center;
-    }
-    .cta-card {
-      background: linear-gradient(135deg, rgba(108, 99, 255, 0.12), rgba(0, 212, 170, 0.08));
-      border: 1px solid rgba(108, 99, 255, 0.3);
+    .step-desc { font-size: 0.83rem; color: var(--text-secondary); }
+
+    /* ── Pricing / App CTA ── */
+    .app-cta-section { padding: 100px 0; }
+    .app-cta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 900px; margin: 0 auto; }
+    .store-card {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
       border-radius: var(--radius-xl);
-      padding: 64px;
+      padding: 36px 32px;
+      text-align: center;
+      transition: var(--transition);
+    }
+    .store-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-card); background: var(--bg-card-hover); }
+    .store-icon { font-size: 3rem; margin-bottom: 16px; display: block; }
+    .store-name { font-size: 1.2rem; font-weight: 800; margin-bottom: 8px; }
+    .store-desc { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px; }
+
+    /* ── Final CTA ── */
+    .cta-section { padding: 100px 0; text-align: center; }
+    .cta-card {
+      background: rgba(139,92,246,0.1);
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: var(--radius-xl);
+      padding: 72px 64px;
       position: relative;
       overflow: hidden;
     }
     .cta-card::before {
       content: '';
       position: absolute;
-      top: -50%; left: 50%; transform: translateX(-50%);
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(108, 99, 255, 0.1), transparent);
+      top: -60px; left: 50%; transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(217,70,239,0.15), rgba(139,92,246,0.1), transparent 70%);
+      pointer-events: none;
     }
-    .cta-title { font-size: 2.4rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 16px; }
-    .cta-desc { color: var(--text-secondary); font-size: 1rem; margin-bottom: 36px; }
+    .cta-title { font-size: 2.6rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 16px; position: relative; }
+    .cta-desc { color: var(--text-secondary); font-size: 1rem; margin-bottom: 36px; position: relative; }
+
     /* ── Footer ── */
     .footer { padding: 32px 0; border-top: 1px solid var(--glass-border); text-align: center; color: var(--text-muted); font-size: 0.85rem; }
+    .footer a { color: var(--accent-light); }
+
     /* ── Animations ── */
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes fadeInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+
     /* ── Responsive ── */
     @media (max-width: 900px) {
-      .hero-grid { grid-template-columns: 1fr; gap: 60px; }
-      .hero-visual { display: none; }
-      .features-grid { grid-template-columns: 1fr; }
+      .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+      .hero-visual { max-width: 400px; margin: 0 auto; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
       .steps { grid-template-columns: repeat(2, 1fr); }
       .steps::before { display: none; }
-      .cta-card { padding: 40px 24px; }
+      .use-cases-grid { grid-template-columns: 1fr; }
+      .app-cta-grid { grid-template-columns: 1fr; }
+      .cta-card { padding: 48px 28px; }
+      .cta-title { font-size: 2rem; }
+    }
+    @media (max-width: 600px) {
+      .features-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -212,7 +321,7 @@
         </a>
         <div class="nav-links" id="nav-links">
           <a href="#como-funciona">¿Cómo funciona?</a>
-          <a href="#caracteristicas">Características</a>
+          <a href="#usos">Equipaje & Mascotas</a>
           <a href="login.html" class="btn btn-secondary btn-sm" id="nav-login">Iniciar sesión</a>
           <a href="register.html" class="btn btn-primary btn-sm" id="nav-register">Comenzar gratis</a>
         </div>
@@ -226,37 +335,95 @@
       <div class="hero-grid">
         <div>
           <div class="hero-badge">
-            <span>📡</span> Tecnología NFC · Sin app necesaria
+            📡 Tecnología NFC · Sin app · Para equipaje y mascotas
           </div>
           <h1 class="hero-title">
-            Tu mochila siempre<br/>
-            tiene voz para<br/>
-            <span class="highlight">volver a casa</span>
+            Lo que más importa<br/>
+            siempre tiene<br/>
+            <span class="highlight">cómo volver</span>
           </h1>
           <p class="hero-desc">
-            Agrega un chip NFC inteligente a tu equipaje de viaje.
-            Si se pierde, quien lo encuentre solo necesita escanear
-            el chip para contactarte instantáneamente.
+            Un chip NFC inteligente en tu mochila, maleta <strong>o collar de mascota</strong>.
+            Si se pierde, quien lo encuentre escanea el chip
+            y puede contactarte al instante.
             <strong>Sin apps. Sin instalaciones.</strong>
           </p>
           <div class="hero-cta">
             <a href="register.html" class="btn btn-primary">
-              🚀 Registrar mis tags
+              🚀 Proteger mis cosas
             </a>
-            <a href="#como-funciona" class="btn btn-secondary">
-              Ver cómo funciona
+            <a href="#usos" class="btn btn-secondary">
+              Ver usos
             </a>
           </div>
         </div>
+
+        <!-- Visual grid -->
         <div class="hero-visual">
-          <div class="nfc-mockup">
-            <div class="nfc-circle"></div>
-            <div class="nfc-circle"></div>
-            <div class="nfc-circle"></div>
-            <div class="nfc-core">
-              <span class="nfc-icon">📶</span>
+          <div class="hero-nfc-pulse">
+            <div class="pulse-dot">📶</div>
+            <div class="pulse-text">
+              <div class="t1">Chip NFC escaneado</div>
+              <div class="t2">Redirigiendo al contacto del dueño...</div>
             </div>
           </div>
+          <div class="hero-float-card">
+            <span class="float-icon">🎒</span>
+            <span class="float-label">Mochila de viaje</span>
+            <span class="float-sub">Juan García · Activo</span>
+            <span class="float-badge purple">🎒 Objeto</span>
+          </div>
+          <div class="hero-float-card pet">
+            <span class="float-icon">🐕</span>
+            <span class="float-label">Luna — Golden Retriever</span>
+            <span class="float-sub">María G. · 2 años · Activa</span>
+            <span class="float-badge orange">🐾 Mascota</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Usos: Equipaje y Mascotas -->
+  <section class="use-cases" id="usos">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Casos de uso</div>
+        <h2 class="section-title">Protege lo que más quieres</h2>
+        <p class="section-subtitle">Un mismo chip, dos mundos de protección</p>
+      </div>
+      <div class="use-cases-grid">
+        <!-- Equipaje -->
+        <div class="usecase-card luggage">
+          <span class="usecase-emoji">🎒</span>
+          <h3 class="usecase-title violet">Equipaje de viaje</h3>
+          <p class="usecase-desc">
+            Viaja sin miedo a perder tus maletas, mochilas o maletines.
+            El chip NFC permite que cualquier persona que las encuentre
+            pueda contactarte sin ver tus datos personales.
+          </p>
+          <ul class="usecase-items">
+            <li>Mochilas de montaña y senderismo</li>
+            <li>Maletas de cabina y bodega</li>
+            <li>Maletines de trabajo y laptops</li>
+            <li>Cámaras, drones y equipo fotográfico</li>
+          </ul>
+        </div>
+        <!-- Mascotas -->
+        <div class="usecase-card pets">
+          <span class="usecase-emoji">🐾</span>
+          <h3 class="usecase-title orange">Mascotas</h3>
+          <p class="usecase-desc">
+            Tu perro, gato o conejo con un collar SafeTag.
+            Si se escapa, quien lo encuentre ve su nombre,
+            especie, raza, color e información médica importante.
+          </p>
+          <ul class="usecase-items">
+            <li>Perros y gatos domésticos</li>
+            <li>Animales con alergias o medicamentos</li>
+            <li>Mascotas con historial médico relevante</li>
+            <li>Cualquier animal con dueño identificado</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -268,23 +435,23 @@
       <div class="section-header">
         <div class="section-tag">Proceso simple</div>
         <h2 class="section-title">Funciona en 4 pasos</h2>
-        <p class="section-subtitle">Desde que pegas el chip hasta recuperar tu maleta perdida</p>
+        <p class="section-subtitle">Desde que recibes el chip hasta que recuperas lo perdido</p>
       </div>
       <div class="steps">
         <div class="step">
           <div class="step-number">1</div>
           <div class="step-title">Compra tu chip</div>
-          <div class="step-desc">Recibes un chip NFC con ID único impreso listo para usar</div>
+          <div class="step-desc">Recibes un chip NFC con ID único impreso, listo para usar</div>
         </div>
         <div class="step">
           <div class="step-number">2</div>
           <div class="step-title">Regístrate</div>
-          <div class="step-desc">Crea tu cuenta y enlaza el chip a tus datos de contacto</div>
+          <div class="step-desc">Crea tu cuenta y enlaza el chip (objeto o mascota) con tus datos</div>
         </div>
         <div class="step">
           <div class="step-number">3</div>
-          <div class="step-title">Pégalo a tu objeto</div>
-          <div class="step-desc">Coloca el chip en tu mochila, maleta o equipaje favorito</div>
+          <div class="step-title">Coloca el chip</div>
+          <div class="step-desc">En tu mochila, maleta, o en el collar de tu mascota</div>
         </div>
         <div class="step">
           <div class="step-number">4</div>
@@ -296,43 +463,68 @@
   </section>
 
   <!-- Features -->
-  <section class="features" id="caracteristicas">
+  <section class="features">
     <div class="container">
       <div class="section-header">
         <div class="section-tag">Características</div>
         <h2 class="section-title">Todo lo que necesitas</h2>
-        <p class="section-subtitle">Diseñado para ser simple para el que lo usa y seguro para el dueño</p>
+        <p class="section-subtitle">Simple para quien lo encuentra, seguro para el dueño</p>
       </div>
       <div class="features-grid">
         <div class="feature-card">
-          <div class="feature-icon purple">🔒</div>
+          <div class="feature-icon violet">🔒</div>
           <div class="feature-title">Privacidad total</div>
-          <div class="feature-desc">Tu teléfono y email nunca se muestran en texto. Solo botones de contacto seguros que protegen tu información personal.</div>
+          <div class="feature-desc">Tu teléfono y email nunca se muestran en texto. Solo botones de contacto seguros.</div>
         </div>
         <div class="feature-card">
-          <div class="feature-icon green">📡</div>
+          <div class="feature-icon cyan">📡</div>
           <div class="feature-title">Sin apps necesarias</div>
-          <div class="feature-desc">Cualquier smartphone moderno puede escanear el chip directamente desde la cámara o ajustes. No hay nada que descargar.</div>
+          <div class="feature-desc">Cualquier iPhone o Android moderno escanea el chip directamente. Sin descargas.</div>
         </div>
         <div class="feature-card">
-          <div class="feature-icon yellow">📊</div>
+          <div class="feature-icon orange">🐾</div>
+          <div class="feature-title">Módulo para mascotas</div>
+          <div class="feature-desc">Muestra especie, raza, color, edad e información médica importante al que encuentre a tu mascota.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon magenta">📊</div>
           <div class="feature-title">Historial de escaneos</div>
-          <div class="feature-desc">Sabe cuándo y desde dónde fue escaneado tu tag. Recibe un registro completo de intentos de contacto.</div>
+          <div class="feature-desc">Sabe cuándo y desde qué dispositivo fue escaneado tu chip. Registro completo.</div>
         </div>
         <div class="feature-card">
-          <div class="feature-icon purple">🎛️</div>
-          <div class="feature-title">Múltiples objetos</div>
-          <div class="feature-desc">Registra tantos chips como quieras. Maletas, mochilas, maletines, cámaras — lo que sea que viajes.</div>
+          <div class="feature-icon blue">🎛️</div>
+          <div class="feature-title">Múltiples objetos y mascotas</div>
+          <div class="feature-desc">Registra tantos chips como quieras. Mezcla objetos y mascotas en un mismo panel.</div>
         </div>
         <div class="feature-card">
-          <div class="feature-icon green">✏️</div>
-          <div class="feature-title">Actualiza tus datos</div>
-          <div class="feature-desc">¿Cambiaste de número? Actualiza tus datos en el panel y el chip refleja el cambio inmediatamente.</div>
+          <div class="feature-icon red">⚡</div>
+          <div class="feature-title">Actualización instantánea</div>
+          <div class="feature-desc">¿Cambiaste de número? Actualiza tus datos y el chip lo refleja al instante, sin reprogramarlo.</div>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon yellow">🔗</div>
-          <div class="feature-title">Activa / Desactiva</div>
-          <div class="feature-desc">Si vendes o regalas un objeto, desactiva el chip con un clic. El nuevo dueño puede registrarlo a su nombre.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- App mobile CTA -->
+  <section class="app-cta-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">App Móvil</div>
+        <h2 class="section-title">Gestiona desde tu celular</h2>
+        <p class="section-subtitle">Próximamente disponible en App Store y Google Play</p>
+      </div>
+      <div class="app-cta-grid">
+        <div class="store-card">
+          <span class="store-icon">🍎</span>
+          <div class="store-name">App Store</div>
+          <div class="store-desc">Disponible para iPhone y iPad. Gestiona tus tags y mascotas desde iOS.</div>
+          <span class="badge badge-scan" style="font-size:0.8rem; padding: 6px 16px;">Próximamente</span>
+        </div>
+        <div class="store-card">
+          <span class="store-icon">🤖</span>
+          <div class="store-name">Google Play</div>
+          <div class="store-desc">Para todos los dispositivos Android. Recibe notificaciones de escaneos.</div>
+          <span class="badge badge-scan" style="font-size:0.8rem; padding: 6px 16px;">Próximamente</span>
         </div>
       </div>
     </div>
@@ -342,8 +534,8 @@
   <section class="cta-section">
     <div class="container">
       <div class="cta-card">
-        <h2 class="cta-title">¿Listo para viajar<br/>sin preocupaciones?</h2>
-        <p class="cta-desc">Registra tus chips NFC y protege tu equipaje hoy mismo. Es gratis y toma menos de 2 minutos.</p>
+        <h2 class="cta-title">Todo lo que quieres<br/>siempre tiene<br/><span class="highlight">forma de volver</span></h2>
+        <p class="cta-desc">Protege tu equipaje de viaje y tus mascotas hoy mismo. Es gratis y toma menos de 2 minutos.</p>
         <a href="register.html" class="btn btn-primary" style="padding: 16px 40px; font-size: 1rem;">
           🏷️ Crear mi cuenta gratis
         </a>
@@ -354,12 +546,11 @@
   <!-- Footer -->
   <footer class="footer">
     <div class="container">
-      <p>© 2024 SafeTag · Tecnología NFC para equipaje de viaje · Diseñado con ❤️</p>
+      <p>© 2024 SafeTag · Tecnología NFC para equipaje y mascotas · Hecho con ❤️</p>
     </div>
   </footer>
 
   <script>
-    // Auto-redirect si ya está logueado
     const token = localStorage.getItem('safetag_token');
     if (token) {
       document.getElementById('nav-login').textContent = 'Mi panel';

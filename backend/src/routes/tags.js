@@ -8,17 +8,23 @@ const router = express.Router();
 router.use(authMiddleware);
 
 // GET /api/tags — listar mis tags
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const db = getDb();
-    const tags = db.prepare(`
+    const result = await db.query(`
       SELECT t.*, 
         (SELECT COUNT(*) FROM scans WHERE tag_id = t.id) as total_scans,
         (SELECT MAX(scanned_at) FROM scans WHERE tag_id = t.id) as ultimo_escaneo
       FROM tags t
-      WHERE t.user_id = ?
+      WHERE t.user_id = $1
       ORDER BY t.created_at DESC
-    `).all(req.user.id);
+    `, [req.user.id]);
+
+    // pg returns count as string sometimes, convert if needed, but JS handles it
+    const tags = result.rows.map(row => ({
+      ...row,
+      total_scans: parseInt(row.total_scans || 0, 10)
+    }));
 
     res.json({ tags });
   } catch (err) {
@@ -28,7 +34,7 @@ router.get('/', (req, res) => {
 });
 
 // POST /api/tags — crear nuevo tag
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const {
       id, nombre_tag, nombre_dueno, telefono, email, mensaje,
@@ -54,8 +60,8 @@ router.post('/', (req, res) => {
 
     const db = getDb();
 
-    const existingTag = db.prepare('SELECT id, user_id FROM tags WHERE id = ?').get(idClean);
-    if (existingTag) {
+    const existingTag = await db.query('SELECT id, user_id FROM tags WHERE id = $1', [idClean]);
+    if (existingTag.rows.length > 0) {
       return res.status(409).json({ error: 'Este ID de tag ya está registrado por otro usuario.' });
     }
 
@@ -63,12 +69,12 @@ router.post('/', (req, res) => {
       ? '¡Hola! Encontraste a mi mascota. Por favor contáctame, te lo agradezco mucho 🐾'
       : '¡Hola! Encontraste mi objeto. Por favor contáctame.';
 
-    db.prepare(`
+    await db.query(`
       INSERT INTO tags
         (id, user_id, nombre_tag, nombre_dueno, telefono, email, mensaje, activo,
          tipo, especie, raza, color_descripcion, edad, info_medica)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?)
-    `).run(
+      VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8, $9, $10, $11, $12, $13)
+    `, [
       idClean,
       req.user.id,
       nombre_tag.trim(),
@@ -82,10 +88,10 @@ router.post('/', (req, res) => {
       color_descripcion ? color_descripcion.trim() : null,
       edad ? edad.trim() : null,
       info_medica ? info_medica.trim() : null
-    );
+    ]);
 
-    const newTag = db.prepare('SELECT * FROM tags WHERE id = ?').get(idClean);
-    res.status(201).json({ message: 'Tag registrado exitosamente.', tag: newTag });
+    const newTagRes = await db.query('SELECT * FROM tags WHERE id = $1', [idClean]);
+    res.status(201).json({ message: 'Tag registrado exitosamente.', tag: newTagRes.rows[0] });
   } catch (err) {
     console.error('Error creando tag:', err);
     res.status(500).json({ error: 'Error al crear el tag.' });
@@ -93,13 +99,13 @@ router.post('/', (req, res) => {
 });
 
 // PUT /api/tags/:id — editar tag
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const tagId = req.params.id.toUpperCase();
     const db = getDb();
 
-    const tag = db.prepare('SELECT * FROM tags WHERE id = ? AND user_id = ?').get(tagId, req.user.id);
-    if (!tag) {
+    const tagRes = await db.query('SELECT * FROM tags WHERE id = $1 AND user_id = $2', [tagId, req.user.id]);
+    if (tagRes.rows.length === 0) {
       return res.status(404).json({ error: 'Tag no encontrado o no tienes permisos para editarlo.' });
     }
 
@@ -108,27 +114,27 @@ router.put('/:id', (req, res) => {
       especie, raza, color_descripcion, edad, info_medica
     } = req.body;
 
-    db.prepare(`
+    await db.query(`
       UPDATE tags SET
-        nombre_tag        = COALESCE(?, nombre_tag),
-        nombre_dueno      = COALESCE(?, nombre_dueno),
-        telefono          = COALESCE(?, telefono),
-        email             = COALESCE(?, email),
-        mensaje           = COALESCE(?, mensaje),
-        activo            = COALESCE(?, activo),
-        especie           = COALESCE(?, especie),
-        raza              = COALESCE(?, raza),
-        color_descripcion = COALESCE(?, color_descripcion),
-        edad              = COALESCE(?, edad),
-        info_medica       = COALESCE(?, info_medica)
-      WHERE id = ? AND user_id = ?
-    `).run(
+        nombre_tag        = COALESCE($1, nombre_tag),
+        nombre_dueno      = COALESCE($2, nombre_dueno),
+        telefono          = COALESCE($3, telefono),
+        email             = COALESCE($4, email),
+        mensaje           = COALESCE($5, mensaje),
+        activo            = COALESCE($6, activo),
+        especie           = COALESCE($7, especie),
+        raza              = COALESCE($8, raza),
+        color_descripcion = COALESCE($9, color_descripcion),
+        edad              = COALESCE($10, edad),
+        info_medica       = COALESCE($11, info_medica)
+      WHERE id = $12 AND user_id = $13
+    `, [
       nombre_tag        ? nombre_tag.trim()              : null,
       nombre_dueno      ? nombre_dueno.trim()            : null,
       telefono          ? telefono.trim()                : null,
       email             ? email.toLowerCase().trim()     : null,
       mensaje           ? mensaje.trim()                 : null,
-      activo !== undefined ? (activo ? 1 : 0)           : null,
+      activo !== undefined ? activo                      : null,
       especie           ? especie.trim()                 : null,
       raza              ? raza.trim()                    : null,
       color_descripcion ? color_descripcion.trim()       : null,
@@ -136,10 +142,10 @@ router.put('/:id', (req, res) => {
       info_medica       ? info_medica.trim()             : null,
       tagId,
       req.user.id
-    );
+    ]);
 
-    const updatedTag = db.prepare('SELECT * FROM tags WHERE id = ?').get(tagId);
-    res.json({ message: 'Tag actualizado exitosamente.', tag: updatedTag });
+    const updatedTagRes = await db.query('SELECT * FROM tags WHERE id = $1', [tagId]);
+    res.json({ message: 'Tag actualizado exitosamente.', tag: updatedTagRes.rows[0] });
   } catch (err) {
     console.error('Error actualizando tag:', err);
     res.status(500).json({ error: 'Error al actualizar el tag.' });
@@ -147,17 +153,17 @@ router.put('/:id', (req, res) => {
 });
 
 // DELETE /api/tags/:id — eliminar tag
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     const tagId = req.params.id.toUpperCase();
     const db = getDb();
 
-    const tag = db.prepare('SELECT * FROM tags WHERE id = ? AND user_id = ?').get(tagId, req.user.id);
-    if (!tag) {
+    const tagRes = await db.query('SELECT * FROM tags WHERE id = $1 AND user_id = $2', [tagId, req.user.id]);
+    if (tagRes.rows.length === 0) {
       return res.status(404).json({ error: 'Tag no encontrado o no tienes permisos para eliminarlo.' });
     }
 
-    db.prepare('DELETE FROM tags WHERE id = ? AND user_id = ?').run(tagId, req.user.id);
+    await db.query('DELETE FROM tags WHERE id = $1 AND user_id = $2', [tagId, req.user.id]);
     res.json({ message: 'Tag eliminado exitosamente.' });
   } catch (err) {
     console.error('Error eliminando tag:', err);
@@ -166,21 +172,25 @@ router.delete('/:id', (req, res) => {
 });
 
 // GET /api/tags/:id/scans — historial de escaneos
-router.get('/:id/scans', (req, res) => {
+router.get('/:id/scans', async (req, res) => {
   try {
     const tagId = req.params.id.toUpperCase();
     const db = getDb();
 
-    const tag = db.prepare('SELECT id FROM tags WHERE id = ? AND user_id = ?').get(tagId, req.user.id);
-    if (!tag) {
+    const tagRes = await db.query('SELECT id FROM tags WHERE id = $1 AND user_id = $2', [tagId, req.user.id]);
+    if (tagRes.rows.length === 0) {
       return res.status(404).json({ error: 'Tag no encontrado o no tienes permisos.' });
     }
 
-    const scans = db.prepare(`
-      SELECT * FROM scans WHERE tag_id = ? ORDER BY scanned_at DESC LIMIT 100
-    `).all(tagId);
+    const scansRes = await db.query(`
+      SELECT id, tag_id, ip, user_agent, pais, ciudad, scanned_at 
+      FROM scans 
+      WHERE tag_id = $1 
+      ORDER BY scanned_at DESC 
+      LIMIT 100
+    `, [tagId]);
 
-    res.json({ tag_id: tagId, total: scans.length, scans });
+    res.json({ tag_id: tagId, total: scansRes.rows.length, scans: scansRes.rows });
   } catch (err) {
     console.error('Error obteniendo escaneos:', err);
     res.status(500).json({ error: 'Error al obtener el historial de escaneos.' });

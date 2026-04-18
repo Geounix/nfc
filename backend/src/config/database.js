@@ -1,81 +1,86 @@
-const Database = require('better-sqlite3');
-const path = require('path');
+const { Pool } = require('pg');
 
-const DB_PATH = path.join(__dirname, '../../database.db');
-
-let db;
+let pool;
 
 function getDb() {
-  if (!db) {
-    db = new Database(DB_PATH);
-    db.pragma('journal_mode = WAL');
-    db.pragma('foreign_keys = ON');
-    initializeSchema();
-    runMigrations();
+  if (!pool) {
+    pool = new Pool({
+      host: process.env.PG_HOST || 'localhost',
+      port: process.env.PG_PORT || 5432,
+      user: process.env.PG_USER || 'postgres',
+      password: process.env.PG_PASSWORD || 'password',
+      database: process.env.PG_DB || 'safetag',
+    });
+
+    pool.on('error', (err) => {
+      console.error('❌ Error inesperado en el pool de PostgreSQL:', err);
+      process.exit(-1);
+    });
+
+    // Iniciar el esquema automáticamente
+    initializeSchema().catch(console.error);
   }
-  return db;
+  return pool;
 }
 
-function initializeSchema() {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      nombre TEXT NOT NULL,
-      email TEXT UNIQUE NOT NULL,
-      password TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
+async function initializeSchema() {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
 
-    CREATE TABLE IF NOT EXISTS tags (
-      id TEXT PRIMARY KEY,
-      user_id INTEGER NOT NULL,
-      nombre_tag TEXT NOT NULL,
-      nombre_dueno TEXT NOT NULL,
-      telefono TEXT NOT NULL,
-      email TEXT NOT NULL,
-      mensaje TEXT DEFAULT '¡Hola! Por favor contáctame.',
-      activo INTEGER DEFAULT 1,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-    );
+    // Tabla de usuarios
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        nombre VARCHAR(255) NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
 
-    CREATE TABLE IF NOT EXISTS scans (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      tag_id TEXT NOT NULL,
-      ip TEXT,
-      user_agent TEXT,
-      pais TEXT,
-      ciudad TEXT,
-      scanned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
-    );
-  `);
-  console.log('✅ Base de datos SQLite inicializada correctamente');
-}
+    // Tabla de tags
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS tags (
+        id VARCHAR(50) PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        nombre_tag VARCHAR(255) NOT NULL,
+        nombre_dueno VARCHAR(255) NOT NULL,
+        telefono VARCHAR(50) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        mensaje TEXT DEFAULT '¡Hola! Por favor contáctame.',
+        activo BOOLEAN DEFAULT true,
+        tipo VARCHAR(50) DEFAULT 'objeto',
+        especie VARCHAR(100),
+        raza VARCHAR(100),
+        color_descripcion VARCHAR(255),
+        edad VARCHAR(50),
+        info_medica TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
 
-// Migraciones seguras — solo agregan columnas si no existen
-function runMigrations() {
-  const existingCols = db.prepare(`PRAGMA table_info(tags)`).all().map(c => c.name);
+    // Tabla de escaneos
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS scans (
+        id SERIAL PRIMARY KEY,
+        tag_id VARCHAR(50) NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+        ip VARCHAR(50),
+        user_agent TEXT,
+        pais VARCHAR(100),
+        ciudad VARCHAR(100),
+        scanned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
 
-  const petColumns = [
-    { name: 'tipo',              sql: `ALTER TABLE tags ADD COLUMN tipo TEXT DEFAULT 'objeto'` },
-    { name: 'especie',           sql: `ALTER TABLE tags ADD COLUMN especie TEXT` },
-    { name: 'raza',              sql: `ALTER TABLE tags ADD COLUMN raza TEXT` },
-    { name: 'color_descripcion', sql: `ALTER TABLE tags ADD COLUMN color_descripcion TEXT` },
-    { name: 'edad',              sql: `ALTER TABLE tags ADD COLUMN edad TEXT` },
-    { name: 'info_medica',       sql: `ALTER TABLE tags ADD COLUMN info_medica TEXT` },
-  ];
-
-  let migrated = 0;
-  for (const col of petColumns) {
-    if (!existingCols.includes(col.name)) {
-      db.exec(col.sql);
-      migrated++;
-    }
-  }
-
-  if (migrated > 0) {
-    console.log(`🔄 Migración: ${migrated} columna(s) de mascotas agregadas a la tabla tags`);
+    await client.query('COMMIT');
+    console.log('✅ Esquema PostgreSQL inicializado / verificado correctamente');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('❌ Error inicializando esquema en Postgres:', err);
+    throw err;
+  } finally {
+    client.release();
   }
 }
 

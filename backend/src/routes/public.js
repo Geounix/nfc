@@ -4,16 +4,17 @@ const { getDb } = require('../config/database');
 const router = express.Router();
 
 // GET /api/tag/:id — Datos públicos del tag (JSON para el frontend)
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const tagId = req.params.id.toUpperCase();
     const db = getDb();
 
-    const tag = db.prepare(`
+    const tagRes = await db.query(`
       SELECT id, nombre_dueno, telefono, email, mensaje, activo, nombre_tag,
              tipo, especie, raza, color_descripcion, edad, info_medica
-      FROM tags WHERE id = ?
-    `).get(tagId);
+      FROM tags WHERE id = $1
+    `, [tagId]);
+    const tag = tagRes.rows[0];
 
     if (!tag) {
       return res.status(404).json({ error: 'Tag no encontrado. Verifica el ID del chip NFC.' });
@@ -27,10 +28,10 @@ router.get('/:id', (req, res) => {
     const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'desconocida';
     const userAgent = req.headers['user-agent'] || 'desconocido';
 
-    db.prepare(`
+    await db.query(`
       INSERT INTO scans (tag_id, ip, user_agent, pais, ciudad)
-      VALUES (?, ?, ?, 'Desconocido', 'Desconocida')
-    `).run(tagId, ip, userAgent);
+      VALUES ($1, $2, $3, 'Desconocido', 'Desconocida')
+    `, [tagId, ip, userAgent]);
 
     const esMascota = tag.tipo === 'mascota';
 
@@ -59,21 +60,21 @@ router.get('/:id', (req, res) => {
       contacto: { whatsapp: whatsappLink, email: emailLink }
     };
 
-    // Agregar info pública de mascota (datos no sensibles)
+    // Agregar info médica si es mascota
     if (esMascota) {
       response.mascota = {
-        especie:           tag.especie,
-        raza:              tag.raza,
+        especie: tag.especie,
+        raza: tag.raza,
         color_descripcion: tag.color_descripcion,
-        edad:              tag.edad,
-        info_medica:       tag.info_medica
+        edad: tag.edad,
+        info_medica: tag.info_medica
       };
     }
 
     res.json(response);
   } catch (err) {
-    console.error('Error en página pública:', err);
-    res.status(500).json({ error: 'Error interno del servidor.' });
+    console.error('Error obteniendo tag público:', err);
+    res.status(500).json({ error: 'Error del servidor.' });
   }
 });
 
