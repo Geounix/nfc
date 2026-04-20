@@ -37,9 +37,11 @@ Vamos a crear la base de datos y un usuario para que la aplicación se pueda con
 sudo -u postgres psql
 
 # 2. Una vez dentro (verás postgres=#), ejecuta estos comandos uno por uno:
-CREATE DATABASE safetag;
 CREATE USER safeuser WITH ENCRYPTED PASSWORD 'TuPasswordSeguro123';
+CREATE DATABASE safetag OWNER safeuser;
 GRANT ALL PRIVILEGES ON DATABASE safetag TO safeuser;
+\c safetag
+GRANT ALL ON SCHEMA public TO safeuser;
 \q
 ```
 *(Asegúrate de recordar o cambiar `TuPasswordSeguro123`).*

@@ -16,15 +16,13 @@ function getDb() {
       console.error('❌ Error inesperado en el pool de PostgreSQL:', err);
       process.exit(-1);
     });
-
-    // Iniciar el esquema automáticamente
-    initializeSchema().catch(console.error);
   }
   return pool;
 }
 
 async function initializeSchema() {
-  const client = await pool.connect();
+  const currentPool = getDb();
+  const client = await currentPool.connect();
   try {
     await client.query('BEGIN');
 
@@ -84,4 +82,4 @@ async function initializeSchema() {
   }
 }
 
-module.exports = { getDb };
+module.exports = { getDb, initializeSchema };

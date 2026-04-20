@@ -67,20 +67,27 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada.' });
 });
 
+const { initializeSchema } = require('./config/database');
+
 // ── Start server ──────────────────────────────────────────────────────────────
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`\n🏷️  SafeTag API corriendo en:`);
-  console.log(`   Local:    http://localhost:${PORT}`);
-  console.log(`   Red LAN:  http://[TU_IP_LOCAL]:${PORT}`);
-  console.log(`\n📡 Endpoints disponibles:`);
-  console.log(`   POST   http://localhost:${PORT}/api/auth/register`);
-  console.log(`   POST   http://localhost:${PORT}/api/auth/login`);
-  console.log(`   GET    http://localhost:${PORT}/api/tags`);
-  console.log(`   POST   http://localhost:${PORT}/api/tags`);
-  console.log(`   GET    http://localhost:${PORT}/api/tag/:id  (API JSON)`);
-  console.log(`   GET    http://localhost:${PORT}/tag/:id       (Página pública HTML)`);
-  console.log(`\n💾 Base de datos: SQLite (database.db)`);
-  console.log(`\n✅ Servidor listo!\n`);
+initializeSchema().then(() => {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`\n🏷️  SafeTag API corriendo en:`);
+    console.log(`   Local:    http://localhost:${PORT}`);
+    console.log(`   Red LAN:  http://[TU_IP_LOCAL]:${PORT}`);
+    console.log(`\n📡 Endpoints disponibles:`);
+    console.log(`   POST   http://localhost:${PORT}/api/auth/register`);
+    console.log(`   POST   http://localhost:${PORT}/api/auth/login`);
+    console.log(`   GET    http://localhost:${PORT}/api/tags`);
+    console.log(`   POST   http://localhost:${PORT}/api/tags`);
+    console.log(`   GET    http://localhost:${PORT}/api/tag/:id  (API JSON)`);
+    console.log(`   GET    http://localhost:${PORT}/tag/:id       (Página pública HTML)`);
+    console.log(`\n💾 Base de datos: PostgreSQL (safetag)`);
+    console.log(`\n✅ Servidor listo!\n`);
+  });
+}).catch(err => {
+  console.error("❌ Error grave: No se pudo conectar o inicializar PostgreSQL. Revisa tus credenciales en el archivo .env", err);
+  process.exit(1);
 });
 
 module.exports = app;
