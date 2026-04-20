@@ -150,10 +150,15 @@ document.addEventListener('DOMContentLoaded', () => {
     ` : '';
 
     return `
-      <div class="tag-card ${!tag.activo ? 'inactive' : ''}" id="tag-card-${tag.id}">
+      <div class="tag-card ${!tag.activo ? 'inactive' : ''} tag-card-${esMascota ? 'mascota' : 'objeto'}" id="tag-card-${tag.id}">
         <div class="tag-card-header">
           <div>
-            <div class="tag-id-display">ID: ${escapeHtml(tag.id)}</div>
+            <div class="tag-id-display">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#2563EB" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 2C2.89543 2 2 2.89543 2 4V20C2 21.1046 2.89543 22 4 22H20C21.1046 22 22 21.1046 22 20V4C22 2.89543 21.1046 2 20 2H4ZM6 6H10V10H6V6ZM14 6H18V10H14V6ZM6 14H10V18H6V14ZM14 14H18V18H14V14Z"/>
+              </svg>
+              Chip NFC: ${escapeHtml(tag.id)}
+            </div>
             <div class="tag-name" style="margin-top:8px">${escapeHtml(tag.nombre_tag)}</div>
             <div class="tag-owner">👤 ${escapeHtml(tag.nombre_dueno)}</div>
             ${petExtra}
