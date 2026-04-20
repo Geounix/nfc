@@ -43,6 +43,62 @@ document.addEventListener('DOMContentLoaded', () => {
     userEmail.textContent = user.email;
   }
 
+  // ── Image compression & upload (global) ──────────────────────────
+  window.currentPetImage = null;
+
+  window.handleImageUpload = function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showToast('Por favor selecciona una imagen válida');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_SIZE = 800; 
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height *= MAX_SIZE / width;
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width *= MAX_SIZE / height;
+            height = MAX_SIZE;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.65);
+        window.currentPetImage = dataUrl;
+        
+        document.getElementById('tag-imagen-preview').src = dataUrl;
+        document.getElementById('imagen-preview-container').style.display = 'block';
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.clearImageUpload = function() {
+    window.currentPetImage = ''; // Vaciamos para indicar que se debe eliminar en BD
+    document.getElementById('tag-imagen-preview').src = '';
+    document.getElementById('imagen-preview-container').style.display = 'none';
+    document.getElementById('tag-imagen-file').value = '';
+  };
+
   // ── Tipo selector (global, visible desde HTML onclick) ───────────
   window.selectTipo = function(tipo) {
     tagTipoInput.value = tipo;
@@ -164,6 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ${petExtra}
           </div>
           <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px">
+            ${esMascota && tag.imagen_mascota ? `<img src="${tag.imagen_mascota}" style="width:48px;height:48px;border-radius:var(--radius-sm);object-fit:cover;border:1px solid #E5E7EB;margin-bottom:4px" alt="Foto"/>` : ''}
             ${typeBadge}
             <span class="badge ${tag.activo ? 'badge-active' : 'badge-inactive'}">
               <span class="badge-dot"></span>
@@ -231,6 +288,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('group-tipo').style.display = 'block';
     modalTitle.textContent = '➕ Nuevo Tag NFC';
     btnSaveTag.textContent = 'Guardar Tag';
+    window.clearImageUpload();
+    window.currentPetImage = null; // no eliminamos, solo limpiamos estado para nuevo insert
     selectTipo('objeto'); // reset UI
     clearModalAlerts();
     modalTag.classList.add('open');
@@ -256,6 +315,15 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('tag-color').value = tag.color_descripcion || '';
       document.getElementById('tag-edad').value = tag.edad || '';
       document.getElementById('tag-medica').value = tag.info_medica || '';
+      
+      // Restaurar preview si hay imagen previa
+      window.currentPetImage = null; // por defecto no la actualizamos si no se toca
+      if (tag.imagen_mascota) {
+        document.getElementById('tag-imagen-preview').src = tag.imagen_mascota;
+        document.getElementById('imagen-preview-container').style.display = 'block';
+      } else {
+        document.getElementById('imagen-preview-container').style.display = 'none';
+      }
     } else {
       selectTipo('objeto');
     }
@@ -316,6 +384,10 @@ document.addEventListener('DOMContentLoaded', () => {
       body.color_descripcion = document.getElementById('tag-color').value.trim();
       body.edad = document.getElementById('tag-edad').value.trim();
       body.info_medica = document.getElementById('tag-medica').value.trim();
+
+      if (window.currentPetImage !== null) {
+        body.imagen_mascota = window.currentPetImage;
+      }
 
       if (!body.especie) return showModalError('La especie de tu mascota es requerida.');
     }

@@ -271,6 +271,18 @@
           <div style="border-top: 1px solid var(--glass-border); margin: 20px 0 20px; padding-top: 20px;">
             <p style="font-size:0.82rem; color: var(--text-muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">🐾 Información de la mascota</p>
           </div>
+          <div class="form-group">
+            <label class="form-label" for="tag-imagen-file">Foto de la mascota (Opcional)</label>
+            <div style="display:flex; align-items:center; gap: 16px;">
+              <input type="file" id="tag-imagen-file" accept="image/*" style="display:none" onchange="handleImageUpload(event)" />
+              <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('tag-imagen-file').click()">📸 Elegir foto...</button>
+              <div id="imagen-preview-container" style="display:none; position:relative;">
+                <img id="tag-imagen-preview" src="" alt="Vista previa" style="width: 60px; height: 60px; border-radius: var(--radius-md); object-fit: cover; border: 2px solid var(--glass-border);" />
+                <button type="button" onclick="clearImageUpload()" style="position:absolute; top:-8px; right:-8px; background:var(--red); color:white; border:none; border-radius:50%; width:22px; height:22px; font-weight:bold; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">✕</button>
+              </div>
+            </div>
+            <div class="form-hint" style="margin-top: 8px;">Aparecerá junto a la info pública de tu mascota.</div>
+          </div>
           <div class="form-row">
             <div class="form-group" style="margin-bottom:0">
               <label class="form-label" for="tag-especie">Especie <span style="color: var(--red)">*</span></label>

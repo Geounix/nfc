@@ -58,6 +58,9 @@ async function initializeSchema() {
       );
     `);
 
+    // Añadir columna imagen_mascota si no existe (Migración)
+    await client.query(`ALTER TABLE tags ADD COLUMN IF NOT EXISTS imagen_mascota TEXT;`);
+
     // Tabla de escaneos
     await client.query(`
       CREATE TABLE IF NOT EXISTS scans (

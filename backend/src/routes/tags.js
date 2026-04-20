@@ -38,7 +38,7 @@ router.post('/', async (req, res) => {
   try {
     const {
       id, nombre_tag, nombre_dueno, telefono, email, mensaje,
-      tipo, especie, raza, color_descripcion, edad, info_medica
+      tipo, especie, raza, color_descripcion, edad, info_medica, imagen_mascota
     } = req.body;
 
     if (!id || !nombre_tag || !nombre_dueno || !telefono || !email) {
@@ -72,8 +72,8 @@ router.post('/', async (req, res) => {
     await db.query(`
       INSERT INTO tags
         (id, user_id, nombre_tag, nombre_dueno, telefono, email, mensaje, activo,
-         tipo, especie, raza, color_descripcion, edad, info_medica)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8, $9, $10, $11, $12, $13)
+         tipo, especie, raza, color_descripcion, edad, info_medica, imagen_mascota)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8, $9, $10, $11, $12, $13, $14)
     `, [
       idClean,
       req.user.id,
@@ -87,7 +87,8 @@ router.post('/', async (req, res) => {
       raza ? raza.trim() : null,
       color_descripcion ? color_descripcion.trim() : null,
       edad ? edad.trim() : null,
-      info_medica ? info_medica.trim() : null
+      info_medica ? info_medica.trim() : null,
+      imagen_mascota || null
     ]);
 
     const newTagRes = await db.query('SELECT * FROM tags WHERE id = $1', [idClean]);
@@ -111,7 +112,7 @@ router.put('/:id', async (req, res) => {
 
     const {
       nombre_tag, nombre_dueno, telefono, email, mensaje, activo,
-      especie, raza, color_descripcion, edad, info_medica
+      especie, raza, color_descripcion, edad, info_medica, imagen_mascota
     } = req.body;
 
     await db.query(`
@@ -126,8 +127,9 @@ router.put('/:id', async (req, res) => {
         raza              = COALESCE($8, raza),
         color_descripcion = COALESCE($9, color_descripcion),
         edad              = COALESCE($10, edad),
-        info_medica       = COALESCE($11, info_medica)
-      WHERE id = $12 AND user_id = $13
+        info_medica       = COALESCE($11, info_medica),
+        imagen_mascota    = COALESCE($12, imagen_mascota)
+      WHERE id = $13 AND user_id = $14
     `, [
       nombre_tag        ? nombre_tag.trim()              : null,
       nombre_dueno      ? nombre_dueno.trim()            : null,
@@ -140,6 +142,7 @@ router.put('/:id', async (req, res) => {
       color_descripcion ? color_descripcion.trim()       : null,
       edad              ? edad.trim()                    : null,
       info_medica       ? info_medica.trim()             : null,
+      imagen_mascota    ? imagen_mascota                 : null,
       tagId,
       req.user.id
     ]);

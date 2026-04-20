@@ -11,7 +11,7 @@ router.get('/:id', async (req, res) => {
 
     const tagRes = await db.query(`
       SELECT id, nombre_dueno, telefono, email, mensaje, activo, nombre_tag,
-             tipo, especie, raza, color_descripcion, edad, info_medica
+             tipo, especie, raza, color_descripcion, edad, info_medica, imagen_mascota
       FROM tags WHERE id = $1
     `, [tagId]);
     const tag = tagRes.rows[0];
@@ -57,6 +57,9 @@ router.get('/:id', async (req, res) => {
       nombre_dueno: tag.nombre_dueno,
       nombre_tag: tag.nombre_tag,
       mensaje: tag.mensaje,
+      imagen_mascota: tag.imagen_mascota,
+      telefono_raw: tag.telefono.replace(/\D/g, ''), // Para usar en la geolocalización
+      whatsapp_text_base: whatsappText,
       contacto: { whatsapp: whatsappLink, email: emailLink }
     };
 
