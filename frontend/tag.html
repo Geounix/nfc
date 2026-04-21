@@ -355,7 +355,7 @@
             const baseText = window.tagData.whatsapp_text_base || '¡Hola! Encontré tu tag.';
             const finalMsg = `${baseText} ¡Aquí está mi ubicación actual donde lo encontré!: ${mapsLink}`;
             
-            window.open(`https://wa.me/${window.tagData.telefono_raw}?text=${encodeURIComponent(finalMsg)}`, '_blank');
+            window.location.href = `https://wa.me/${window.tagData.telefono_raw}?text=${encodeURIComponent(finalMsg)}`;
           },
           (error) => {
             btn.innerHTML = originalText;

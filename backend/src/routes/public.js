@@ -1,7 +1,28 @@
 const express = require('express');
 const { getDb } = require('../config/database');
+const http = require('http');
 
 const router = express.Router();
+
+function getGeoData(ip) {
+  return new Promise(resolve => {
+    if (!ip || ip.includes('127.0.0.1') || ip.includes('::1')) {
+      return resolve({ pais: 'Local', ciudad: 'Network' });
+    }
+    const req = http.get(`http://ip-api.com/json/${ip}?fields=country,city`, { timeout: 2500 }, res => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          resolve({ pais: parsed.country || 'Desconocido', ciudad: parsed.city || 'Desconocida' });
+        } catch { resolve({ pais: 'Desconocido', ciudad: 'Desconocida' }); }
+      });
+    });
+    req.on('error', () => resolve({ pais: 'Desconocido', ciudad: 'Desconocida' }));
+    req.on('timeout', () => { req.abort(); resolve({ pais: 'Desconocido', ciudad: 'Desconocida' }); });
+  });
+}
 
 // GET /api/tag/:id — Datos públicos del tag (JSON para el frontend)
 router.get('/:id', async (req, res) => {
@@ -25,13 +46,20 @@ router.get('/:id', async (req, res) => {
     }
 
     // Registrar escaneo
-    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'desconocida';
+    const rawIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'desconocida';
+    // Limpiar IP en caso de IPs compuestas como ::ffff:192.168.x.x
+    const ip = rawIp.replace('::ffff:', '').trim();
     const userAgent = req.headers['user-agent'] || 'desconocido';
 
-    await db.query(`
-      INSERT INTO scans (tag_id, ip, user_agent, pais, ciudad)
-      VALUES ($1, $2, $3, 'Desconocido', 'Desconocida')
-    `, [tagId, ip, userAgent]);
+    // Obtener ubicación de la IP en background (asíncrono sin bloquear la respuesta)
+    getGeoData(ip).then(async (geo) => {
+      try {
+        await db.query(`
+          INSERT INTO scans (tag_id, ip, user_agent, pais, ciudad)
+          VALUES ($1, $2, $3, $4, $5)
+        `, [tagId, ip, userAgent, geo.pais, geo.ciudad]);
+      } catch (err) { console.error('Error insertando scan:', err); }
+    });
 
     const esMascota = tag.tipo === 'mascota';
 
