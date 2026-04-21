@@ -112,7 +112,7 @@ body::before {
   color: white; /* Logo icon contains SVG/emoji that needs white on the indigo base */
 }
 .nav-links { display: flex; gap: 8px; align-items: center; }
-.nav-links a {
+.nav-links a:not(.btn) {
   padding: 8px 16px;
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
@@ -120,7 +120,7 @@ body::before {
   font-weight: 500;
   transition: var(--transition);
 }
-.nav-links a:hover { color: var(--text-primary); background: var(--glass); }
+.nav-links a:not(.btn):hover { color: var(--text-primary); background: var(--glass); }
 
 /* ── Buttons ─────────────────────────────────────────────────── */
 .btn {
@@ -139,7 +139,7 @@ body::before {
 }
 .btn-primary {
   background: var(--accent);
-  color: white;
+  color: #FFFFFF !important;
   box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -147,7 +147,11 @@ body::before {
   transform: translateY(-3px);
   background: var(--accent-dark);
   box-shadow: 0 15px 35px rgba(79, 70, 229, 0.35);
-  color: white;
+  color: #FFFFFF !important;
+}
+.btn-primary .spinner {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #FFFFFF;
 }
 .btn-primary:active {
   transform: translateY(1px);
