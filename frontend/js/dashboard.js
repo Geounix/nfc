@@ -303,7 +303,26 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('group-tipo').style.display = 'none'; // no cambiar tipo al editar
     document.getElementById('tag-nombre').value = tag.nombre_tag;
     document.getElementById('tag-dueno').value = tag.nombre_dueno;
-    document.getElementById('tag-telefono').value = tag.telefono;
+    document.getElementById('tag-email').value = tag.email;
+
+    // Procesar el teléfono para separar el código de país
+    const fullTel = tag.telefono || '';
+    const countrySelect = document.getElementById('country-code');
+    const telInput = document.getElementById('tag-telefono');
+    
+    let matched = false;
+    for (const option of countrySelect.options) {
+      if (option.value !== '+' && fullTel.startsWith(option.value)) {
+        countrySelect.value = option.value;
+        telInput.value = fullTel.substring(option.value.length);
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) {
+      countrySelect.value = '+';
+      telInput.value = fullTel.startsWith('+') ? fullTel.substring(1) : fullTel;
+    }
     document.getElementById('tag-email').value = tag.email;
     document.getElementById('tag-mensaje').value = tag.mensaje || '';
 
@@ -372,7 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tipo,
       nombre_tag: document.getElementById('tag-nombre').value.trim(),
       nombre_dueno: document.getElementById('tag-dueno').value.trim(),
-      telefono: document.getElementById('tag-telefono').value.trim(),
+      telefono: document.getElementById('country-code').value + document.getElementById('tag-telefono').value.trim().replace(/\D/g, ''),
       email: document.getElementById('tag-email').value.trim(),
       mensaje: document.getElementById('tag-mensaje').value.trim()
     };
@@ -395,6 +414,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!body.nombre_tag || !body.nombre_dueno || !body.telefono || !body.email) {
       return showModalError('Por favor completa todos los campos requeridos.');
     }
+    if (body.telefono.length < 10) {
+      return showModalError('El número de WhatsApp proporcionado luce incompleto o demasiado corto.');
+    }
+
     if (!isEditing && !body.id) {
       return showModalError('El ID del chip es obligatorio.');
     }

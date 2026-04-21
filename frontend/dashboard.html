@@ -256,8 +256,22 @@
           </div>
           <div class="form-group" style="margin-bottom:0">
             <label class="form-label" for="tag-telefono">WhatsApp <span style="color: var(--red)">*</span></label>
-            <input class="form-input" type="tel" id="tag-telefono" placeholder="Ej: +50688889999" required />
-            <div class="form-hint">Con código de país (nunca visible en texto)</div>
+            <div style="display: flex; gap: 8px;">
+              <select id="country-code" class="form-input" style="width: 105px; padding: 12px 8px; cursor: pointer;">
+                <option value="+1" selected>🇩🇴 +1</option>
+                <option value="+52">🇲🇽 +52</option>
+                <option value="+57">🇨🇴 +57</option>
+                <option value="+54">🇦🇷 +54</option>
+                <option value="+56">🇨🇱 +56</option>
+                <option value="+51">🇵🇪 +51</option>
+                <option value="+58">🇻🇪 +58</option>
+                <option value="+593">🇪🇨 +593</option>
+                <option value="+34">🇪🇸 +34</option>
+                <option value="+">📍 Otro</option>
+              </select>
+              <input class="form-input" type="tel" id="tag-telefono" placeholder="809 804 2315" required style="flex: 1;" />
+            </div>
+            <div class="form-hint">Selecciona tu país e ingresa tu número.</div>
           </div>
         </div>
 
