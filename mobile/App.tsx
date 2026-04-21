@@ -115,7 +115,7 @@ export default function App() {
     <SafeAreaProvider>
       <AuthProvider>
         <NavigationContainer>
-          <StatusBar style="light" backgroundColor={Colors.bgPrimary} />
+          <StatusBar style="dark" backgroundColor={Colors.bgPrimary} />
           <AppNavigator />
         </NavigationContainer>
       </AuthProvider>
