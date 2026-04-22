@@ -39,8 +39,8 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 18px;
     }
-    .auth-title { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
-    .auth-subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 32px; }
+    .auth-title { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; text-align: center; }
+    .auth-subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 32px; text-align: center; }
     .auth-footer { text-align: center; margin-top: 24px; font-size: 0.88rem; color: var(--text-muted); }
     .auth-footer a { color: var(--accent-light); font-weight: 500; }
     .divider { border: none; border-top: 1px solid var(--glass-border); margin: 24px 0; }
@@ -62,9 +62,9 @@
 <body>
   <div class="auth-page">
     <div class="auth-card">
-      <a href="/" class="auth-logo" style="gap: 12px;">
-        <img src="img/logo.png" alt="Cerca Logo" class="logo-img" />
-        Cerca
+      <a href="/" class="auth-logo" style="flex-direction: column; align-items: center; gap: 10px; text-align: center; margin-bottom: 28px;">
+        <img src="img/logo.png" alt="Cerca Logo" style="height: 72px; width: auto; object-fit: contain;" />
+        <span style="font-size: 1.8rem; font-weight: 900; letter-spacing: -0.5px;">Cerca</span>
       </a>
 
       <h1 class="auth-title">Crea tu cuenta</h1>
