@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  Dimensions, StatusBar,
+  Dimensions, StatusBar, Image
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,14 +24,8 @@ export default function WelcomeScreen({ navigation }: Props) {
 
       {/* Logo */}
       <View style={styles.logoWrap}>
-        <LinearGradient
-          colors={Colors.gradientAccent as [string, string]}
-          start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-          style={styles.logoBox}
-        >
-          <Text style={styles.logoEmoji}>🏷️</Text>
-        </LinearGradient>
-        <Text style={styles.logoText}>SafeTag</Text>
+        <Image style={{ width: 44, height: 44, resizeMode: 'contain' }} source={require('../assets/logo.png')} />
+        <Text style={styles.logoText}>Cerca</Text>
       </View>
 
       {/* Hero cards */}

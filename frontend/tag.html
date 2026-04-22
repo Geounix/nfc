@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Objeto Encontrado — SafeTag</title>
-  <meta name="description" content="Encontraste un objeto con un chip SafeTag. Contacta al dueño fácilmente." />
+  <title>Objeto Encontrado — Cerca</title>
+  <meta name="description" content="Encontraste un objeto con un chip Cerca. Contacta al dueño fácilmente." />
   <link rel="stylesheet" href="/css/styles.css" />
   <style>
     .tag-page {
@@ -227,8 +227,8 @@
       window.tagData = data; // Guardamos para la geolocalización
       const esMascota = data.tipo === 'mascota';
       document.title = esMascota
-        ? `🐾 Mascota encontrada: ${data.nombre_tag} — SafeTag`
-        : `Objeto encontrado: ${data.nombre_tag} — SafeTag`;
+        ? `🐾 Mascota encontrada: ${data.nombre_tag} — Cerca`
+        : `Objeto encontrado: ${data.nombre_tag} — Cerca`;
 
       // Bloque de info de mascota
       let petBlock = '';
@@ -326,7 +326,7 @@
         </p>
 
         <div class="safetag-footer">
-          Powered by <a href="/">SafeTag</a> · Tecnología NFC para equipaje y mascotas
+          Powered by <a href="/">Cerca</a> · Tecnología NFC para equipaje y mascotas
         </div>
       `;
     }

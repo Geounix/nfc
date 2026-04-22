@@ -59,7 +59,7 @@ app.get('/register', (req, res) => {
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'SafeTag API funcionando correctamente 🚀', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', message: 'Cerca API funcionando correctamente 🚀', timestamp: new Date().toISOString() });
 });
 
 // ── 404 Handler ───────────────────────────────────────────────────────────────
@@ -72,7 +72,7 @@ const { initializeSchema } = require('./config/database');
 // ── Start server ──────────────────────────────────────────────────────────────
 initializeSchema().then(() => {
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`\n🏷️  SafeTag API corriendo en:`);
+    console.log(`\n🏷️  Cerca API corriendo en:`);
     console.log(`   Local:    http://localhost:${PORT}`);
     console.log(`   Red LAN:  http://[TU_IP_LOCAL]:${PORT}`);
     console.log(`\n📡 Endpoints disponibles:`);

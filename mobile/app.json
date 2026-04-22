@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "SafeTag",
+    "name": "Cerca",
     "slug": "safetag",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -16,7 +16,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.safetag.nfc",
       "infoPlist": {
-        "NFCReaderUsageDescription": "SafeTag usa NFC para escanear chips de tus objetos y mascotas."
+        "NFCReaderUsageDescription": "Cerca usa NFC para escanear chips de tus objetos y mascotas."
       },
       "entitlements": {
         "com.apple.developer.nfc.readersession.formats": [

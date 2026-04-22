@@ -1,8 +1,25 @@
 const express = require('express');
+const { z } = require('zod');
 const { getDb } = require('../config/database');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
+
+const tagSchema = z.object({
+  id: z.string().regex(/^[A-Z0-9\-_]{3,30}$/i, 'ID inválido'),
+  nombre_tag: z.string().min(1, 'Requerido'),
+  nombre_dueno: z.string().min(1, 'Requerido'),
+  telefono: z.string().min(1, 'Requerido'),
+  email: z.string().email(),
+  mensaje: z.string().optional(),
+  tipo: z.string().optional(),
+  especie: z.string().optional(),
+  raza: z.string().optional(),
+  color_descripcion: z.string().optional(),
+  edad: z.string().optional(),
+  info_medica: z.string().optional(),
+  imagen_mascota: z.string().optional(),
+});
 
 // Todas las rutas requieren autenticación
 router.use(authMiddleware);
@@ -36,14 +53,15 @@ router.get('/', async (req, res) => {
 // POST /api/tags — crear nuevo tag
 router.post('/', async (req, res) => {
   try {
+    const parsed = tagSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: 'Datos inválidos. Verifica todos los campos requeridos.' });
+    }
+
     const {
       id, nombre_tag, nombre_dueno, telefono, email, mensaje,
       tipo, especie, raza, color_descripcion, edad, info_medica, imagen_mascota
-    } = req.body;
-
-    if (!id || !nombre_tag || !nombre_dueno || !telefono || !email) {
-      return res.status(400).json({ error: 'Faltan campos requeridos: id, nombre_tag, nombre_dueno, telefono, email.' });
-    }
+    } = parsed.data;
 
     const tipoClean = (tipo === 'mascota') ? 'mascota' : 'objeto';
 
@@ -52,11 +70,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Para mascotas, la especie es requerida (ej: Perro, Gato).' });
     }
 
-    // Validar formato de ID
     const idClean = id.trim().toUpperCase();
-    if (!/^[A-Z0-9\-_]{3,30}$/.test(idClean)) {
-      return res.status(400).json({ error: 'El ID del tag solo puede contener letras, números, guiones o guiones bajos (3-30 caracteres).' });
-    }
 
     const db = getDb();
 
@@ -99,9 +113,16 @@ router.post('/', async (req, res) => {
   }
 });
 
+const updateSchema = tagSchema.partial();
+
 // PUT /api/tags/:id — editar tag
 router.put('/:id', async (req, res) => {
   try {
+    const parsed = updateSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: 'Datos inválidos. Verifica todos los campos enviados.' });
+    }
+
     const tagId = req.params.id.toUpperCase();
     const db = getDb();
 
@@ -113,7 +134,7 @@ router.put('/:id', async (req, res) => {
     const {
       nombre_tag, nombre_dueno, telefono, email, mensaje, activo,
       especie, raza, color_descripcion, edad, info_medica, imagen_mascota
-    } = req.body;
+    } = parsed.data;
 
     await db.query(`
       UPDATE tags SET

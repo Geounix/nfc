@@ -109,7 +109,12 @@ body::before {
   border-radius: var(--radius-sm);
   display: flex; align-items: center; justify-content: center;
   font-size: 18px;
-  color: white; /* Logo icon contains SVG/emoji that needs white on the indigo base */
+  color: white;
+}
+.logo-img {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
 }
 .nav-links { display: flex; gap: 8px; align-items: center; }
 .nav-links a:not(.btn) {

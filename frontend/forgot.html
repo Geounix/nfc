@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recuperar contraseña — Cerca</title>
+  <meta name="description" content="Recupera el acceso a tu cuenta Cerca." />
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
+    .auth-card { width: 100%; max-width: 440px; background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); border-radius: var(--radius-xl); padding: 44px; backdrop-filter: blur(20px); }
+    .auth-logo { display: flex; align-items: center; gap: 12px; font-size: 1.3rem; font-weight: 800; margin-bottom: 36px; color: var(--text-primary); text-decoration: none; }
+    .logo-img { height: 36px; width: auto; object-fit: contain; }
+    .auth-title { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+    .auth-subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 32px; }
+    .auth-footer { text-align: center; margin-top: 24px; font-size: 0.88rem; color: var(--text-muted); }
+    .auth-footer a { color: var(--accent-light); font-weight: 500; }
+    .divider { border: none; border-top: 1px solid var(--glass-border); margin: 24px 0; }
+  </style>
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card">
+      <a href="/" class="auth-logo">
+        <img src="img/logo.png" alt="Cerca Logo" class="logo-img" />
+        Cerca
+      </a>
+      <h1 class="auth-title">Recupera tu acceso</h1>
+      <p class="auth-subtitle">Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.</p>
+
+      <div class="alert alert-error" id="alert-error">
+        <span>⚠️</span> <span id="alert-error-msg"></span>
+      </div>
+      <div class="alert alert-success" id="alert-success">
+        <span>✅</span> <span id="alert-success-msg"></span>
+      </div>
+
+      <form id="forgot-form" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="email">Correo electrónico</label>
+          <input class="form-input" type="email" id="email" placeholder="tu@correo.com" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="btn-submit">Enviar enlace</button>
+      </form>
+
+      <hr class="divider" />
+      <div class="auth-footer">
+        ¿Te acordaste? <a href="login.html">Inicia sesión aquí</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('forgot-form');
+    const btnSubmit = document.getElementById('btn-submit');
+    const alertError = document.getElementById('alert-error');
+    const alertErrorMsg = document.getElementById('alert-error-msg');
+    const alertSuccess = document.getElementById('alert-success');
+    const alertSuccessMsg = document.getElementById('alert-success-msg');
+
+    function showError(msg) { alertError.classList.add('show'); alertErrorMsg.textContent = msg; alertSuccess.classList.remove('show'); }
+    function showSuccess(msg) { alertSuccess.classList.add('show'); alertSuccessMsg.textContent = msg; alertError.classList.remove('show'); }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      if (!email) return showError('Por favor ingresa tu correo.');
+
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '<div class="spinner"></div> Enviando...';
+
+      try {
+        const res = await fetch('/api/auth/forgot-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showError(data.error || 'Error al procesar la solicitud.');
+          btnSubmit.disabled = false;
+          btnSubmit.textContent = 'Enviar enlace';
+          return;
+        }
+        showSuccess(data.message);
+        btnSubmit.textContent = 'Enviado';
+      } catch {
+        showError('Error de conexión con el servidor.');
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = 'Enviar enlace';
+      }
+    });
+  </script>
+</body>
+</html>
