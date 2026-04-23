@@ -1,12 +1,20 @@
 {
   "name": "safetag-backend",
   "version": "1.0.0",
-  "description": "SafeTag NFC System - Backend API",
+  "description": "SafeTag NFC - Backend API",
   "main": "src/index.js",
   "scripts": {
+    "dev": "node src/index.js",
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "migrate": "node src/scripts/migrate.js up",
+    "migrate:down": "node src/scripts/migrate.js down",
+    "migrate:status": "node src/scripts/migrate.js status",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch"
   },
+  "keywords": ["nfc", "tags", "api"],
+  "author": "",
+  "license": "MIT",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -14,11 +22,25 @@
     "express": "^4.19.2",
     "express-rate-limit": "^7.2.0",
     "jsonwebtoken": "^9.0.2",
-    "nodemailer": "^8.0.5",
-    "pg": "^8.20.0",
-    "zod": "^4.3.6"
+    "nodemailer": "^6.9.13",
+    "pg": "^8.11.5",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0"
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/index.js",
+      "!src/scripts/**"
+    ],
+    "testMatch": [
+      "**/tests/**/*.test.js",
+      "**/__tests__/**/*.js"
+    ]
   }
 }

@@ -416,11 +416,13 @@ body::before {
 }
 .tag-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
 .tag-owner { font-size: 0.88rem; color: var(--text-secondary); }
-.tag-stats { display: flex; gap: 16px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--glass-border); }
-.tag-stat { text-align: center; }
-.tag-stat-value { font-size: 1.2rem; font-weight: 700; color: var(--accent-light); }
-.tag-stat-label { font-size: 0.75rem; color: var(--text-muted); }
-.tag-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.tag-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--glass-border); }
+.tag-stat { text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.tag-stat-value { font-size: 1.2rem; font-weight: 700; color: var(--accent-light); line-height: 1.3; }
+.tag-stat-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+.tag-actions { display: grid; grid-template-columns: repeat(3, 1fr) 40px; gap: 8px; margin-top: 16px; align-items: center; }
+.tag-actions .btn { justify-content: center; min-width: 0; }
+.tag-actions .btn-danger { padding: 8px; width: 40px; height: 40px; }
 
 /* ── Empty state ─────────────────────────────────────────────── */
 .empty-state {
@@ -474,6 +476,13 @@ body::before {
   .form-row { grid-template-columns: 1fr; }
   .page-title { font-size: 1.6rem; }
   .modal { padding: 24px; }
-  .tag-actions { flex-direction: column; }
+  .tag-actions { grid-template-columns: 1fr 1fr 40px; gap: 8px; }
   .tag-actions .btn { width: 100%; }
+  .tag-actions .btn-danger { width: 40px; }
+  .tag-stats { grid-template-columns: 1fr 1fr; }
+  .dashboard-layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .main-content { padding: 20px 16px; }
+  .stats-row { grid-template-columns: 1fr; }
+  .tags-grid { grid-template-columns: 1fr; }
 }

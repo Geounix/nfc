@@ -2,60 +2,116 @@ const express = require('express');
 const { z } = require('zod');
 const { getDb } = require('../config/database');
 const authMiddleware = require('../middleware/auth');
+const { logger } = require('../utils/logger');
 
 const router = express.Router();
 
+// ── Schemas de validación ──
 const tagSchema = z.object({
-  id: z.string().regex(/^[A-Z0-9\-_]{3,30}$/i, 'ID inválido'),
-  nombre_tag: z.string().min(1, 'Requerido'),
-  nombre_dueno: z.string().min(1, 'Requerido'),
-  telefono: z.string().min(1, 'Requerido'),
+  id: z.string()
+    .regex(/^[A-Z0-9\-_]{3,30}$/i, 'ID inválido: solo letras, números, guiones (3-30 caracteres)')
+    .transform(val => val.trim().toUpperCase()),
+  nombre_tag: z.string().min(1, 'Requerido').max(255),
+  nombre_dueno: z.string().min(1, 'Requerido').max(255),
+  telefono: z.string().min(1, 'Requerido').max(50),
   email: z.string().email(),
-  mensaje: z.string().optional(),
-  tipo: z.string().optional(),
-  especie: z.string().optional(),
-  raza: z.string().optional(),
-  color_descripcion: z.string().optional(),
-  edad: z.string().optional(),
-  info_medica: z.string().optional(),
-  imagen_mascota: z.string().optional(),
+  mensaje: z.string().max(1000).optional(),
+  tipo: z.enum(['mascota', 'objeto']).optional(),
+  especie: z.string().max(100).optional(),
+  raza: z.string().max(100).optional(),
+  color_descripcion: z.string().max(255).optional(),
+  edad: z.string().max(50).optional(),
+  info_medica: z.string().max(1000).optional(),
+  imagen_mascota: z.string().url().optional().or(z.literal('')),
 });
 
-// Todas las rutas requieren autenticación
+// ── Constantes de paginación ──
+const DEFAULT_PAGE_SIZE = 20;
+const MAX_PAGE_SIZE = 100;
+
+// ── Funciones de sanitización ──
+function sanitizeTagId(id) {
+  if (!id || typeof id !== 'string') return null;
+  // Solo permitir caracteres seguros, convertir a mayúsculas
+  const clean = id.trim().toUpperCase().replace(/[^A-Z0-9\-_]/g, '');
+  if (clean.length < 3 || clean.length > 30) return null;
+  return clean;
+}
+
+function sanitizeString(str, maxLength = 255) {
+  if (!str || typeof str !== 'string') return '';
+  return str.trim().replace(/[<>'"&]/g, '').substring(0, maxLength);
+}
+
+function sanitizeEmail(email) {
+  return email.toLowerCase().trim().replace(/[^a-z0-9@._-]/g, '');
+}
+
+// ── Middleware de autenticación ──
 router.use(authMiddleware);
 
-// GET /api/tags — listar mis tags
+// GET /api/tags — listar mis tags con paginación
 router.get('/', async (req, res) => {
+  const correlationId = req.correlationId || 'unknown';
+
   try {
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(MAX_PAGE_SIZE, Math.max(1, parseInt(req.query.limit, 10) || DEFAULT_PAGE_SIZE));
+    const offset = (page - 1) * limit;
+
     const db = getDb();
+
+    // Query con paginación
     const result = await db.query(`
-      SELECT t.*, 
+      SELECT t.*,
         (SELECT COUNT(*) FROM scans WHERE tag_id = t.id) as total_scans,
         (SELECT MAX(scanned_at) FROM scans WHERE tag_id = t.id) as ultimo_escaneo
       FROM tags t
       WHERE t.user_id = $1
       ORDER BY t.created_at DESC
-    `, [req.user.id]);
+      LIMIT $2 OFFSET $3
+    `, [req.user.id, limit, offset]);
 
-    // pg returns count as string sometimes, convert if needed, but JS handles it
+    // Total de tags para calcular páginas
+    const countResult = await db.query('SELECT COUNT(*) as total FROM tags WHERE user_id = $1', [req.user.id]);
+    const total = parseInt(countResult.rows[0].total, 10);
+
     const tags = result.rows.map(row => ({
       ...row,
       total_scans: parseInt(row.total_scans || 0, 10)
     }));
 
-    res.json({ tags });
+    logger.debug('Tags listed', { correlationId, userId: req.user.id, page, limit, count: tags.length });
+
+    res.json({
+      tags,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasNext: offset + tags.length < total,
+        hasPrev: page > 1
+      }
+    });
   } catch (err) {
-    console.error('Error listando tags:', err);
+    logger.error('Error listing tags', { correlationId, error: err.message });
     res.status(500).json({ error: 'Error al obtener los tags.' });
   }
 });
 
 // POST /api/tags — crear nuevo tag
 router.post('/', async (req, res) => {
+  const correlationId = req.correlationId || 'unknown';
+
   try {
     const parsed = tagSchema.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({ error: 'Datos inválidos. Verifica todos los campos requeridos.' });
+      logger.warn('Tag validation failed', { correlationId, errors: parsed.error.issues });
+      return res.status(400).json({
+        error: 'Datos inválidos. Verifica todos los campos requeridos.',
+        details: parsed.error.issues.map(i => i.message)
+      });
     }
 
     const {
@@ -70,17 +126,15 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Para mascotas, la especie es requerida (ej: Perro, Gato).' });
     }
 
-    const idClean = id.trim().toUpperCase();
-
     const db = getDb();
 
-    const existingTag = await db.query('SELECT id, user_id FROM tags WHERE id = $1', [idClean]);
+    const existingTag = await db.query('SELECT id, user_id FROM tags WHERE id = $1', [id]);
     if (existingTag.rows.length > 0) {
       return res.status(409).json({ error: 'Este ID de tag ya está registrado por otro usuario.' });
     }
 
     const defaultMsg = tipoClean === 'mascota'
-      ? '¡Hola! Encontraste a mi mascota. Por favor contáctame, te lo agradezco mucho 🐾'
+      ? '¡Hola! Encontraste a mi mascota. Por favor contáctame, te lo agradezco mucho'
       : '¡Hola! Encontraste mi objeto. Por favor contáctame.';
 
     await db.query(`
@@ -89,41 +143,54 @@ router.post('/', async (req, res) => {
          tipo, especie, raza, color_descripcion, edad, info_medica, imagen_mascota)
       VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8, $9, $10, $11, $12, $13, $14)
     `, [
-      idClean,
+      id,
       req.user.id,
-      nombre_tag.trim(),
-      nombre_dueno.trim(),
-      telefono.trim(),
-      email.toLowerCase().trim(),
-      mensaje ? mensaje.trim() : defaultMsg,
+      sanitizeString(nombre_tag),
+      sanitizeString(nombre_dueno),
+      sanitizeString(telefono, 50),
+      sanitizeEmail(email),
+      mensaje ? sanitizeString(mensaje, 1000) : defaultMsg,
       tipoClean,
-      especie ? especie.trim() : null,
-      raza ? raza.trim() : null,
-      color_descripcion ? color_descripcion.trim() : null,
-      edad ? edad.trim() : null,
-      info_medica ? info_medica.trim() : null,
+      especie ? sanitizeString(especie, 100) : null,
+      raza ? sanitizeString(raza, 100) : null,
+      color_descripcion ? sanitizeString(color_descripcion, 255) : null,
+      edad ? sanitizeString(edad, 50) : null,
+      info_medica ? sanitizeString(info_medica, 1000) : null,
       imagen_mascota || null
     ]);
 
-    const newTagRes = await db.query('SELECT * FROM tags WHERE id = $1', [idClean]);
+    const newTagRes = await db.query('SELECT * FROM tags WHERE id = $1', [id]);
+    logger.info('Tag created', { correlationId, userId: req.user.id, tagId: id });
+
     res.status(201).json({ message: 'Tag registrado exitosamente.', tag: newTagRes.rows[0] });
   } catch (err) {
-    console.error('Error creando tag:', err);
+    logger.error('Error creating tag', { correlationId, error: err.message });
     res.status(500).json({ error: 'Error al crear el tag.' });
   }
 });
 
 const updateSchema = tagSchema.partial();
 
-// PUT /api/tags/:id — editar tag
+// PUT /api/tags/:id — editar tag (con sanitización adicional)
 router.put('/:id', async (req, res) => {
+  const correlationId = req.correlationId || 'unknown';
+
   try {
-    const parsed = updateSchema.safeParse(req.body);
-    if (!parsed.success) {
-      return res.status(400).json({ error: 'Datos inválidos. Verifica todos los campos enviados.' });
+    // Sanitización adicional del ID en la URL
+    const tagId = sanitizeTagId(req.params.id);
+    if (!tagId) {
+      return res.status(400).json({ error: 'ID de tag inválido.' });
     }
 
-    const tagId = req.params.id.toUpperCase();
+    const parsed = updateSchema.safeParse(req.body);
+    if (!parsed.success) {
+      logger.warn('Tag update validation failed', { correlationId, tagId, errors: parsed.error.issues });
+      return res.status(400).json({
+        error: 'Datos inválidos. Verifica todos los campos enviados.',
+        details: parsed.error.issues.map(i => i.message)
+      });
+    }
+
     const db = getDb();
 
     const tagRes = await db.query('SELECT * FROM tags WHERE id = $1 AND user_id = $2', [tagId, req.user.id]);
@@ -152,34 +219,42 @@ router.put('/:id', async (req, res) => {
         imagen_mascota    = COALESCE($12, imagen_mascota)
       WHERE id = $13 AND user_id = $14
     `, [
-      nombre_tag        ? nombre_tag.trim()              : null,
-      nombre_dueno      ? nombre_dueno.trim()            : null,
-      telefono          ? telefono.trim()                : null,
-      email             ? email.toLowerCase().trim()     : null,
-      mensaje           ? mensaje.trim()                 : null,
-      activo !== undefined ? activo                      : null,
-      especie           ? especie.trim()                 : null,
-      raza              ? raza.trim()                    : null,
-      color_descripcion ? color_descripcion.trim()       : null,
-      edad              ? edad.trim()                    : null,
-      info_medica       ? info_medica.trim()             : null,
-      imagen_mascota    ? imagen_mascota                 : null,
+      nombre_tag        ? sanitizeString(nombre_tag)              : null,
+      nombre_dueno      ? sanitizeString(nombre_dueno)            : null,
+      telefono          ? sanitizeString(telefono, 50)            : null,
+      email             ? sanitizeEmail(email)                     : null,
+      mensaje           ? sanitizeString(mensaje, 1000)           : null,
+      activo !== undefined ? activo                              : null,
+      especie           ? sanitizeString(especie, 100)           : null,
+      raza              ? sanitizeString(raza, 100)               : null,
+      color_descripcion ? sanitizeString(color_descripcion, 255)  : null,
+      edad              ? sanitizeString(edad, 50)                : null,
+      info_medica       ? sanitizeString(info_medica, 1000)        : null,
+      imagen_mascota    ? imagen_mascota                          : null,
       tagId,
       req.user.id
     ]);
 
     const updatedTagRes = await db.query('SELECT * FROM tags WHERE id = $1', [tagId]);
+    logger.info('Tag updated', { correlationId, userId: req.user.id, tagId });
+
     res.json({ message: 'Tag actualizado exitosamente.', tag: updatedTagRes.rows[0] });
   } catch (err) {
-    console.error('Error actualizando tag:', err);
+    logger.error('Error updating tag', { correlationId, error: err.message });
     res.status(500).json({ error: 'Error al actualizar el tag.' });
   }
 });
 
 // DELETE /api/tags/:id — eliminar tag
 router.delete('/:id', async (req, res) => {
+  const correlationId = req.correlationId || 'unknown';
+
   try {
-    const tagId = req.params.id.toUpperCase();
+    const tagId = sanitizeTagId(req.params.id);
+    if (!tagId) {
+      return res.status(400).json({ error: 'ID de tag inválido.' });
+    }
+
     const db = getDb();
 
     const tagRes = await db.query('SELECT * FROM tags WHERE id = $1 AND user_id = $2', [tagId, req.user.id]);
@@ -188,17 +263,29 @@ router.delete('/:id', async (req, res) => {
     }
 
     await db.query('DELETE FROM tags WHERE id = $1 AND user_id = $2', [tagId, req.user.id]);
+    logger.info('Tag deleted', { correlationId, userId: req.user.id, tagId });
+
     res.json({ message: 'Tag eliminado exitosamente.' });
   } catch (err) {
-    console.error('Error eliminando tag:', err);
+    logger.error('Error deleting tag', { correlationId, error: err.message });
     res.status(500).json({ error: 'Error al eliminar el tag.' });
   }
 });
 
-// GET /api/tags/:id/scans — historial de escaneos
+// GET /api/tags/:id/scans — historial de escaneos (con paginación)
 router.get('/:id/scans', async (req, res) => {
+  const correlationId = req.correlationId || 'unknown';
+
   try {
-    const tagId = req.params.id.toUpperCase();
+    const tagId = sanitizeTagId(req.params.id);
+    if (!tagId) {
+      return res.status(400).json({ error: 'ID de tag inválido.' });
+    }
+
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 50));
+    const offset = (page - 1) * limit;
+
     const db = getDb();
 
     const tagRes = await db.query('SELECT id FROM tags WHERE id = $1 AND user_id = $2', [tagId, req.user.id]);
@@ -207,16 +294,30 @@ router.get('/:id/scans', async (req, res) => {
     }
 
     const scansRes = await db.query(`
-      SELECT id, tag_id, ip, user_agent, pais, ciudad, scanned_at 
-      FROM scans 
-      WHERE tag_id = $1 
-      ORDER BY scanned_at DESC 
-      LIMIT 100
-    `, [tagId]);
+      SELECT id, tag_id, ip, user_agent, pais, ciudad, scanned_at
+      FROM scans
+      WHERE tag_id = $1
+      ORDER BY scanned_at DESC
+      LIMIT $2 OFFSET $3
+    `, [tagId, limit, offset]);
 
-    res.json({ tag_id: tagId, total: scansRes.rows.length, scans: scansRes.rows });
+    const countRes = await db.query('SELECT COUNT(*) as total FROM scans WHERE tag_id = $1', [tagId]);
+    const total = parseInt(countRes.rows[0].total, 10);
+
+    logger.debug('Scans retrieved', { correlationId, userId: req.user.id, tagId, count: scansRes.rows.length });
+
+    res.json({
+      tag_id: tagId,
+      scans: scansRes.rows,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (err) {
-    console.error('Error obteniendo escaneos:', err);
+    logger.error('Error getting scans', { correlationId, error: err.message });
     res.status(500).json({ error: 'Error al obtener el historial de escaneos.' });
   }
 });
