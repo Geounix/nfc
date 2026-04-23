@@ -60,6 +60,31 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
 }
+/* Orbs de fondo (mesh gradient amb iente) */
+body::before {
+  content: '';
+  position: fixed;
+  top: -20vh;
+  left: -15vw;
+  width: 70vw;
+  height: 70vw;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(108,92,231,0.10) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -20vh;
+  right: -15vw;
+  width: 60vw;
+  height: 60vw;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(77,163,255,0.09) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
 a { color: var(--accent-light); text-decoration: none; transition: var(--transition); }
 a:hover { color: var(--accent-2); }
 img { max-width: 100%; }
@@ -68,10 +93,6 @@ h1, h2, h3, h4, h5, h6, .page-title, .auth-title, .logo {
   font-family: 'Poppins', system-ui, sans-serif;
 }
 
-/* ── Background mesh — clean gradients ───────────────── */
-body::before {
-  display: none;
-}
 
 
 /* ── Containers ──────────────────────────────────────────────  */

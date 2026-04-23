@@ -1,41 +1,103 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cerca — Tu equipaje y mascotas siempre tienen forma de volver</title>
-  <meta name="description" content="Cerca usa chips NFC para proteger mochilas, maletas y mascotas. Si se pierden, quien los encuentre puede contactarte al instante. Sin apps." />
+  <meta name="description"
+    content="Cerca usa chips NFC para proteger mochilas, maletas y mascotas. Si se pierden, quien los encuentre puede contactarte al instante. Sin apps." />
   <link rel="stylesheet" href="css/styles.css" />
   <style>
-    /* ── Landing specific ── */
+    /* ═══════════════════════════════════════════════════════
+       INDEX.HTML — Landing Page Styles
+    ═══════════════════════════════════════════════════════ */
+
+    /* ── Global page background ── */
+    body {
+      background: #F6F7FF;
+    }
+
+    /* ── Navbar ── */
+    .navbar {
+      background: rgba(246, 247, 255, 0.88);
+      border-bottom: 1px solid rgba(108, 92, 231, 0.1);
+    }
+
+    /* ── Hero ── */
     .hero {
       min-height: 100vh;
       display: flex;
       align-items: center;
-      padding: 100px 0 80px;
+      /*      padding: 120px 0 60px; */
       position: relative;
+      overflow: hidden;
     }
+
+    /* Orb arriba-izq */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      left: -200px;
+      width: 700px;
+      height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(108, 92, 231, 0.14) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    /* Orb abajo-der */
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -150px;
+      right: -150px;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(77, 163, 255, 0.12) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
     .hero-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 60px;
-      align-items: center;
+      gap: 0;
+      align-items: stretch;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
     }
+    /* Columna de texto: centrado vertical con padding propio */
+    .hero-grid > div:first-child {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 120px 40px 80px 60px;
+    }
+
+    .hero-grid .hero-image {
+      order: -1;
+    }
+
     .hero-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(139,92,246,0.15);
-      border: 1px solid rgba(139,92,246,0.35);
+      background: rgba(108, 92, 231, 0.1);
+      border: 1px solid rgba(108, 92, 231, 0.25);
       border-radius: 100px;
       padding: 6px 16px;
       font-size: 0.8rem;
       font-weight: 600;
-      color: var(--accent-light);
+      color: var(--accent);
       margin-bottom: 28px;
       animation: fadeInUp 0.6s ease;
     }
+
     .hero-title {
+      font-family: 'Poppins', sans-serif;
       font-size: clamp(2.4rem, 5vw, 4rem);
       font-weight: 900;
       line-height: 1.1;
@@ -43,18 +105,14 @@
       margin-bottom: 24px;
       animation: fadeInUp 0.7s ease;
     }
+
     .hero-title .highlight {
-      background: linear-gradient(to right, #4F46E5, #6366F1, #8B5CF6);
+      background: var(--accent-gradient);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    .hero-title .highlight-cyan {
-      background: var(--green-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
+
     .hero-desc {
       font-size: 1.1rem;
       color: var(--text-secondary);
@@ -63,281 +121,731 @@
       max-width: 480px;
       animation: fadeInUp 0.8s ease;
     }
+
     .hero-cta {
       display: flex;
       gap: 14px;
       flex-wrap: wrap;
       animation: fadeInUp 0.9s ease;
     }
-    /* Imagen grande del hero que se extiende */
+
     .hero-image {
       position: relative;
-      overflow: visible;
-      display: flex;
-      align-items: center;
-    }
-    .hero-image img {
-      width: 100%;
-      max-width: 700px;
-      border-radius: 24px;
-      margin-bottom: -80px;
-    }
-    /* Dual visual cards */
-    .hero-visual {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      animation: fadeInRight 0.8s ease;
-    }
-    .hero-float-card {
-      background: rgba(139,92,246,0.08);
-      border: 1px solid rgba(139,92,246,0.25);
-      border-radius: var(--radius-lg);
-      padding: 24px 20px;
-      text-align: center;
-      backdrop-filter: blur(12px);
-      position: relative;
       overflow: hidden;
+      min-height: 500px;
     }
-    .hero-float-card::before {
-      content: '';
+
+    .hero-image img {
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at top, rgba(139,92,246,0.1), transparent 70%);
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 60% center;
+      border-radius: 0;
+      margin: 0;
+      filter: drop-shadow(4px 0 24px rgba(108,92,231,0.12));
     }
-    .hero-float-card.pet {
-      background: rgba(251,146,60,0.08);
-      border-color: rgba(251,146,60,0.25);
+
+    /* ── Trust bar ── */
+    .trust-bar {
+      background: #fff;
+      border-top: none;
+      border-bottom: 1px solid rgba(108,92,231,0.08);
+      border-radius: 28px 28px 0 0;
+      padding: 28px 0;
+      position: relative;
+      z-index: 3;
+      box-shadow: 0 -16px 48px rgba(108,92,231,0.12);
+      margin-top: 0;
     }
-    .hero-float-card.pet::before {
-      background: radial-gradient(circle at top, rgba(251,146,60,0.1), transparent 70%);
-    }
-    .float-icon { font-size: 2.5rem; margin-bottom: 12px; display: block; }
-    .float-label { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); display: block; margin-bottom: 6px; }
-    .float-sub { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.5; }
-    .float-badge {
-      display: inline-block;
-      margin-top: 12px;
-      padding: 4px 12px;
-      border-radius: 100px;
-      font-size: 0.72rem;
-      font-weight: 700;
-    }
-    .float-badge.purple { background: rgba(139,92,246,0.2); color: #A78BFA; }
-    .float-badge.orange { background: rgba(251,146,60,0.2); color: #FB923C; }
-    /* NFC pulse — top card spanning both columns */
-    .hero-nfc-pulse {
-      grid-column: span 2;
-      background: rgba(6,182,212,0.06);
-      border: 1px solid rgba(6,182,212,0.2);
-      border-radius: var(--radius-lg);
-      padding: 20px;
+
+    .trust-inner {
       display: flex;
       align-items: center;
-      gap: 16px;
-      backdrop-filter: blur(12px);
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
     }
-    .pulse-dot {
-      width: 48px; height: 48px;
-      border-radius: 50%;
-      background: rgba(6,182,212,0.15);
-      border: 1px solid rgba(6,182,212,0.4);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.4rem;
-      flex-shrink: 0;
-      animation: pulse-ring 2s ease-in-out infinite;
-    }
-    @keyframes pulse-ring {
-      0%,100% { box-shadow: 0 0 0 0 rgba(6,182,212,0.3); }
-      50% { box-shadow: 0 0 0 10px rgba(6,182,212,0); }
-    }
-    .pulse-text .t1 { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); }
-    .pulse-text .t2 { font-size: 0.75rem; color: var(--text-secondary); }
 
-    /* ── Sections ── */
-    .features { padding: 100px 0; }
-    .section-header { text-align: center; margin-bottom: 64px; }
-    .section-tag {
-      display: inline-block;
-      background: rgba(139,92,246,0.12);
-      border: 1px solid rgba(139,92,246,0.25);
-      color: var(--accent-light);
-      font-size: 0.8rem;
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
       font-weight: 600;
-      letter-spacing: 1px;
+      color: var(--text-secondary);
+    }
+
+    .trust-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .trust-icon.v {
+      background: rgba(108, 92, 231, 0.12);
+    }
+
+    .trust-icon.b {
+      background: rgba(77, 163, 255, 0.12);
+    }
+
+    .trust-icon.g {
+      background: rgba(34, 197, 94, 0.12);
+    }
+
+    /* ── Section base ── */
+    .section {
+      padding: 96px 0;
+    }
+
+    .section-label {
+      display: inline-block;
+      background: var(--accent-gradient);
+      color: white;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
-      padding: 6px 16px;
+      padding: 5px 14px;
       border-radius: 100px;
       margin-bottom: 16px;
     }
-    .section-title { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.5px; }
-    .section-subtitle { color: var(--text-secondary); margin-top: 12px; font-size: 1rem; max-width: 500px; margin-left: auto; margin-right: auto; }
 
-    /* ── Features grid ── */
-    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    .feature-card {
-      padding: 28px 24px;
-      background: var(--bg-card);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-lg);
-      transition: var(--transition);
-      position: relative;
-      overflow: hidden;
+    .section-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      line-height: 1.2;
+      margin-bottom: 14px;
     }
-    .feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-card); background: var(--bg-card-hover); }
-    .feature-card::after {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: var(--accent-gradient);
-      opacity: 0;
-      transition: var(--transition);
-    }
-    .feature-card:hover::after { opacity: 1; }
-    .feature-icon {
-      width: 48px; height: 48px;
-      border-radius: var(--radius-md);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.5rem;
-      margin-bottom: 18px;
-    }
-    .feature-icon.violet { background: rgba(139,92,246,0.15); }
-    .feature-icon.cyan { background: rgba(6,182,212,0.15); }
-    .feature-icon.orange { background: rgba(251,146,60,0.15); }
-    .feature-icon.magenta { background: rgba(217,70,239,0.15); }
-    .feature-icon.blue { background: rgba(59,130,246,0.15); }
-    .feature-icon.red { background: rgba(244,63,94,0.15); }
-    .feature-title { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
-    .feature-desc { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.65; }
 
-    /* ── Use cases (dual) ── */
-    .use-cases { padding: 100px 0; background: rgba(139,92,246,0.03); }
-    .use-cases-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 48px; }
-    .usecase-card {
-      border-radius: var(--radius-xl);
-      padding: 40px 36px;
-      position: relative;
-      overflow: hidden;
+    .section-sub {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      max-width: 520px;
+      line-height: 1.7;
     }
-    .usecase-card.luggage {
-      background: rgba(139,92,246,0.08);
-      border: 1px solid rgba(139,92,246,0.25);
-    }
-    .usecase-card.pets {
-      background: rgba(251,146,60,0.08);
-      border: 1px solid rgba(251,146,60,0.25);
-    }
-    .usecase-emoji { font-size: 3rem; display: block; margin-bottom: 20px; }
-    .usecase-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.3px; }
-    .usecase-title.violet { background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .usecase-title.orange { background: linear-gradient(135deg, #FB923C, #EF4444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .usecase-desc { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; margin-bottom: 20px; }
-    .usecase-items { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-    .usecase-items li { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; color: var(--text-secondary); }
-    .usecase-items li::before { content: '✓'; font-weight: 700; color: var(--accent-light); }
-    .usecase-card.pets .usecase-items li::before { color: #FB923C; }
 
-    /* ── How it works ── */
-    .how-it-works { padding: 100px 0; }
-    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; position: relative; padding-top: 24px; }
-    .steps::before {
-      content: '';
-      position: absolute;
-      top: 36px; left: 12.5%; right: 12.5%;
-      height: 1px;
-      background: linear-gradient(to right, transparent, var(--accent), var(--accent-2), transparent);
+    .section-header-left {
+      margin-bottom: 56px;
     }
-    .step { text-align: center; }
-    .step-number {
-      width: 48px; height: 48px;
-      background: var(--accent-gradient);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 1rem;
-      margin: 0 auto 16px;
-      box-shadow: 0 0 24px rgba(139,92,246,0.4);
-    }
-    .step-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
-    .step-desc { font-size: 0.83rem; color: var(--text-secondary); }
 
-    /* ── Pricing / App CTA ── */
-    .app-cta-section { padding: 100px 0; }
-    .app-cta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 900px; margin: 0 auto; }
-    .store-card {
-      background: var(--bg-card);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-xl);
-      padding: 36px 32px;
+    .section-header-center {
       text-align: center;
-      transition: var(--transition);
+      margin-bottom: 56px;
     }
-    .store-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-card); background: var(--bg-card-hover); }
-    .store-icon { font-size: 3rem; margin-bottom: 16px; display: block; }
-    .store-name { font-size: 1.2rem; font-weight: 800; margin-bottom: 8px; }
-    .store-desc { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px; }
 
-    /* ── Final CTA ── */
-    .cta-section { padding: 100px 0; text-align: center; }
-    .cta-card {
-      background: rgba(139,92,246,0.1);
-      border: 1px solid rgba(139,92,246,0.3);
-      border-radius: var(--radius-xl);
-      padding: 72px 64px;
+    .section-header-center .section-sub {
+      margin: 0 auto;
+    }
+
+    /* ── Use-cases — full bleed card layout ── */
+    .use-cases-section {
+      background: #fff;
+      position: relative;
+      z-index: 2;
+      padding: 96px 0;
+    }
+
+    .use-cases-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--accent-gradient);
+    }
+
+    .use-cases-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .uc-card {
+      border-radius: 24px;
+      padding: 44px 40px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .uc-card:hover {
+      transform: translateY(-6px);
+    }
+
+    .uc-card.luggage {
+      background: linear-gradient(135deg, rgba(108, 92, 231, 0.07) 0%, rgba(77, 163, 255, 0.07) 100%);
+      border: 1px solid rgba(108, 92, 231, 0.18);
+      box-shadow: 0 8px 40px rgba(108, 92, 231, 0.08);
+    }
+
+    .uc-card.pets {
+      background: linear-gradient(135deg, rgba(249, 115, 22, 0.07) 0%, rgba(239, 68, 68, 0.06) 100%);
+      border: 1px solid rgba(249, 115, 22, 0.18);
+      box-shadow: 0 8px 40px rgba(249, 115, 22, 0.08);
+    }
+
+    .uc-card:hover.luggage {
+      box-shadow: 0 20px 60px rgba(108, 92, 231, 0.15);
+    }
+
+    .uc-card:hover.pets {
+      box-shadow: 0 20px 60px rgba(249, 115, 22, 0.15);
+    }
+
+    .uc-emoji {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 20px;
+    }
+
+    .uc-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 14px;
+      letter-spacing: -0.3px;
+    }
+
+    .uc-title.violet {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .uc-title.orange {
+      background: linear-gradient(135deg, #F97316, #EF4444);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .uc-desc {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.75;
+      margin-bottom: 24px;
+    }
+
+    .uc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .uc-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+    }
+
+    .uc-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .uc-card.luggage .uc-check {
+      background: rgba(108, 92, 231, 0.15);
+      color: var(--accent);
+    }
+
+    .uc-card.pets .uc-check {
+      background: rgba(249, 115, 22, 0.15);
+      color: var(--orange);
+    }
+
+    /* ── Steps — How it works ── */
+    .steps-section {
+      background: linear-gradient(135deg, #1a1040 0%, #0f0a2e 100%);
+      padding: 96px 0;
       position: relative;
       overflow: hidden;
     }
-    .cta-card::before {
+
+    .steps-section::before {
       content: '';
       position: absolute;
-      top: -60px; left: 50%; transform: translateX(-50%);
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(217,70,239,0.15), rgba(139,92,246,0.1), transparent 70%);
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(108, 92, 231, 0.25) 0%, transparent 70%);
       pointer-events: none;
     }
-    .cta-title { font-size: 2.6rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 16px; position: relative; }
-    .cta-desc { color: var(--text-secondary); font-size: 1rem; margin-bottom: 36px; position: relative; }
+
+    .steps-section .section-title,
+    .steps-section .section-label {
+      color: white;
+      -webkit-text-fill-color: white;
+    }
+
+    .steps-section .section-sub {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      position: relative;
+    }
+
+    .steps-grid::before {
+      content: '';
+      position: absolute;
+      top: 36px;
+      left: calc(12.5% + 16px);
+      right: calc(12.5% + 16px);
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(108, 92, 231, 0.6), rgba(77, 163, 255, 0.6), transparent);
+    }
+
+    .step-card {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-num {
+      width: 56px;
+      height: 56px;
+      background: var(--accent-gradient);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: white;
+      margin: 0 auto 20px;
+      box-shadow: 0 0 0 8px rgba(108, 92, 231, 0.15), 0 0 0 16px rgba(108, 92, 231, 0.06);
+    }
+
+    .step-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 8px;
+    }
+
+    .step-desc {
+      font-size: 0.83rem;
+      color: rgba(255, 255, 255, 0.55);
+      line-height: 1.6;
+    }
+
+    /* ── Features — Bento grid ── */
+    .features-section {
+      background: #F6F7FF;
+      padding: 96px 0;
+    }
+
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto auto;
+      gap: 20px;
+    }
+
+    .bento-card {
+      background: #fff;
+      border: 1px solid rgba(108, 92, 231, 0.1);
+      border-radius: 20px;
+      padding: 32px 28px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bento-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(108, 92, 231, 0.1);
+    }
+
+    .bento-card.span2 {
+      grid-column: span 2;
+    }
+
+    .bento-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+
+    .bento-icon.v {
+      background: rgba(108, 92, 231, 0.12);
+    }
+
+    .bento-icon.b {
+      background: rgba(77, 163, 255, 0.12);
+    }
+
+    .bento-icon.o {
+      background: rgba(249, 115, 22, 0.12);
+    }
+
+    .bento-icon.g {
+      background: rgba(34, 197, 94, 0.12);
+    }
+
+    .bento-icon.p {
+      background: rgba(217, 70, 239, 0.12);
+    }
+
+    .bento-icon.r {
+      background: rgba(239, 68, 68, 0.12);
+    }
+
+    .bento-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .bento-desc {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    .bento-card.accent-card {
+      background: var(--accent-gradient);
+      border: none;
+      color: white;
+    }
+
+    .bento-card.accent-card .bento-title {
+      color: white;
+    }
+
+    .bento-card.accent-card .bento-desc {
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .bento-card.accent-card .bento-icon {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* ── App CTA ── */
+    .app-section {
+      background: #fff;
+      padding: 96px 0;
+      border-top: 1px solid rgba(108, 92, 231, 0.08);
+    }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .app-card {
+      background: #F6F7FF;
+      border: 1.5px solid rgba(108, 92, 231, 0.12);
+      border-radius: 20px;
+      padding: 36px 32px;
+      text-align: center;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .app-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(108, 92, 231, 0.1);
+    }
+
+    .app-icon {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 16px;
+    }
+
+    .app-name {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .app-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .app-badge {
+      display: inline-block;
+      padding: 6px 18px;
+      background: rgba(108, 92, 231, 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(108, 92, 231, 0.2);
+      border-radius: 100px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    /* ── Final CTA ── */
+    .cta-section {
+      padding: 96px 0;
+      background: linear-gradient(135deg, #1a1040 0%, #0f0a2e 100%);
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 700px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(108, 92, 231, 0.3) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 900;
+      color: white;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+      line-height: 1.15;
+    }
+
+    .cta-title .hi {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .cta-desc {
+      color: rgba(255, 255, 255, 0.65);
+      font-size: 1rem;
+      margin-bottom: 40px;
+    }
+
+    .cta-btns {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-white {
+      background: #fff;
+      color: var(--accent);
+      font-weight: 700;
+      border-radius: var(--radius-pill);
+      padding: 14px 36px;
+      font-size: 0.95rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-white:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-outline-white {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.85);
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      border-radius: var(--radius-pill);
+      padding: 14px 36px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-outline-white:hover {
+      border-color: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.06);
+    }
 
     /* ── Footer ── */
-    .footer { padding: 32px 0; border-top: 1px solid var(--glass-border); text-align: center; color: var(--text-muted); font-size: 0.85rem; }
-    .footer a { color: var(--accent-light); }
+    .footer {
+      background: #0f0a2e;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 32px 0;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.35);
+      font-size: 0.85rem;
+    }
+
+    .footer a {
+      color: rgba(108, 92, 231, 0.8);
+    }
 
     /* ── Animations ── */
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes fadeInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* ── Mobile Menu ── */
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-primary);
+      padding: 8px;
+    }
+
+    .nav-close-btn {
+      display: none;
+    }
 
     /* ── Responsive ── */
     @media (max-width: 900px) {
-      .hero { padding: 60px 0 40px; }
-      .hero-grid { grid-template-columns: 1fr; gap: 32px; }
-      .hero-title { font-size: clamp(1.8rem, 8vw, 2.5rem); }
-      .hero-desc { font-size: 1rem; max-width: 100%; }
-      .hero-cta { flex-direction: column; }
-      .hero-cta .btn { width: 100%; justify-content: center; }
-      .hero-image { display: none; }
-      .hero-visual { max-width: 400px; margin: 0 auto; }
-      .section-title { font-size: 1.6rem; }
-      .features-grid { grid-template-columns: 1fr; }
-      .steps { grid-template-columns: 1fr; gap: 24px; }
-      .steps::before { display: none; }
-      .use-cases-grid { grid-template-columns: 1fr; }
-      .usecase-card { padding: 28px 24px; }
-      .app-cta-grid { grid-template-columns: 1fr; }
-      .cta-card { padding: 40px 24px; }
-      .cta-title { font-size: 1.8rem; }
+      /* En mobile, imagen a altura fija antes del texto */
+      .hero {
+        padding: 0;
+        min-height: auto;
+      }
+
+      .hero-grid {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+
+      .hero-grid > div:first-child {
+        padding: 40px 24px 48px;
+      }
+
+      .hero-image {
+        order: -1;
+        height: 60vw;
+        min-height: 260px;
+        max-height: 400px;
+      }
+
+      .hero-grid .hero-image {
+        order: -1;
+      }
+
+      .trust-bar {
+        margin-top: 0;
+        border-radius: 20px 20px 0 0;
+      }
+
+      .trust-inner {
+        gap: 24px;
+      }
+
+      .use-cases-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .steps-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+
+      .steps-grid::before {
+        display: none;
+      }
+
+      .bento-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .bento-card.span2 {
+        grid-column: span 1;
+      }
+
+      .app-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section-title {
+        font-size: 1.7rem;
+      }
     }
-    @media (max-width: 600px) {
-      .features-grid { grid-template-columns: 1fr; }
-      .hero-badge { font-size: 0.7rem; padding: 4px 12px; }
-    }
-    /* ── Mobile Menu ── */
-    .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-primary); padding: 8px; }
-    .nav-close-btn { display: none; }
+
     @media (max-width: 768px) {
-      .mobile-menu-btn { display: block; }
+      .mobile-menu-btn {
+        display: block;
+      }
+
       .nav-links {
         position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
         background: var(--bg-card);
         flex-direction: column;
         justify-content: center;
@@ -348,13 +856,52 @@
         z-index: 300;
         margin: 0;
       }
-      .nav-links.open { transform: translateX(0); }
-      .nav-close-btn { display: block; position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--text-primary); }
-      .nav-links a { font-size: 1.2rem; padding: 12px 24px; }
-      .nav-links .btn { width: 200px; text-align: center; }
+
+      .nav-links.open {
+        transform: translateX(0);
+      }
+
+      .nav-close-btn {
+        display: block;
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: none;
+        border: none;
+        font-size: 2rem;
+        cursor: pointer;
+        color: var(--text-primary);
+      }
+
+      .nav-links a {
+        font-size: 1.2rem;
+        padding: 12px 24px;
+      }
+
+      .nav-links .btn {
+        width: 200px;
+        text-align: center;
+      }
+
+      .steps-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .trust-inner {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .cta-btns {
+        flex-direction: column;
+        align-items: center;
+      }
     }
   </style>
 </head>
+
 <body>
   <!-- Navbar -->
   <nav class="navbar">
@@ -362,13 +909,14 @@
       <div class="navbar-inner">
         <a href="/" class="logo">
           <img src="img/logo.png" alt="Cerca Logo" class="logo-img" />
-          <span style="background: linear-gradient(to right,#4F46E5,#6366F1,#8B5CF6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">Cerca</span>
+          <span
+            style="background: var(--accent-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">Cerca</span>
         </a>
         <button class="mobile-menu-btn" id="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
         <div class="nav-links" id="nav-links">
           <button class="nav-close-btn" id="nav-close-btn" onclick="toggleMobileMenu()">✕</button>
           <a href="#como-funciona" onclick="toggleMobileMenu()">¿Cómo funciona?</a>
-          <a href="#usos" onclick="toggleMobileMenu()">Equipaje & Mascotas</a>
+          <a href="#usos" onclick="toggleMobileMenu()">Equipaje &amp; Mascotas</a>
           <a href="login.html" class="btn btn-secondary btn-sm" id="nav-login">Iniciar sesión</a>
           <a href="register.html" class="btn btn-primary btn-sm" id="nav-register">Comenzar gratis</a>
         </div>
@@ -376,7 +924,7 @@
     </div>
   </nav>
 
-  <!-- Hero -->
+  <!-- ══ HERO ══ (mantenido igual) -->
   <section class="hero">
     <div class="container">
       <div class="hero-grid">
@@ -385,8 +933,8 @@
             📡 Tecnología NFC · Sin app · Para equipaje y mascotas
           </div>
           <h1 class="hero-title">
-            Lo que amas,<br/>
-            siempre encuentra<br/>
+            Lo que amas,<br />
+            siempre encuentra<br />
             <span class="highlight">el camino de vuelta.</span>
           </h1>
           <p class="hero-desc">
@@ -402,7 +950,7 @@
           </div>
         </div>
 
-        <!-- Imagen derecha -->
+        <!-- Imagen izquierda -->
         <div class="hero-image">
           <img src="img/mascota-hero.png" alt="Mascota con chip NFC Cerca" />
         </div>
@@ -410,77 +958,95 @@
     </div>
   </section>
 
-  <!-- Usos: Equipaje y Mascotas -->
-  <section class="use-cases" id="usos">
+  <!-- ══ TRUST BAR ══ -->
+  <div class="trust-bar">
     <div class="container">
-      <div class="section-header">
-        <div class="section-tag">Casos de uso</div>
+      <div class="trust-inner">
+        <div class="trust-item">
+          <div class="trust-icon v">📵</div>
+          Sin apps necesarias
+        </div>
+        <div class="trust-item">
+          <div class="trust-icon b">🔒</div>
+          Privacidad total
+        </div>
+        <div class="trust-item">
+          <div class="trust-icon g">⚡</div>
+          Contacto en segundos
+        </div>
+        <div class="trust-item">
+          <div class="trust-icon v">🌍</div>
+          Funciona en cualquier teléfono
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CASOS DE USO ══ -->
+  <section class="use-cases-section" id="usos">
+    <div class="container">
+      <div class="section-header-center">
+        <div class="section-label">Casos de uso</div>
         <h2 class="section-title">Protege lo que más quieres</h2>
-        <p class="section-subtitle">Un mismo chip, dos mundos de protección</p>
+        <p class="section-sub">Un mismo chip, dos mundos de protección para lo más importante</p>
       </div>
       <div class="use-cases-grid">
         <!-- Equipaje -->
-        <div class="usecase-card luggage">
-          <span class="usecase-emoji">🎒</span>
-          <h3 class="usecase-title violet">Equipaje de viaje</h3>
-          <p class="usecase-desc">
-            Viaja sin miedo a perder tus maletas, mochilas o maletines.
-            El chip NFC permite que cualquier persona que las encuentre
-            pueda contactarte sin ver tus datos personales.
-          </p>
-          <ul class="usecase-items">
-            <li>Mochilas de montaña y senderismo</li>
-            <li>Maletas de cabina y bodega</li>
-            <li>Maletines de trabajo y laptops</li>
-            <li>Cámaras, drones y equipo fotográfico</li>
+        <div class="uc-card luggage">
+          <span class="uc-emoji">🎒</span>
+          <h3 class="uc-title violet">Equipaje de viaje</h3>
+          <p class="uc-desc">Viaja sin miedo a perder tus maletas, mochilas o maletines. El chip NFC permite que
+            cualquier persona que las encuentre pueda contactarte sin ver tus datos personales.</p>
+          <ul class="uc-list">
+            <li><span class="uc-check">✓</span>Mochilas de montaña y senderismo</li>
+            <li><span class="uc-check">✓</span>Maletas de cabina y bodega</li>
+            <li><span class="uc-check">✓</span>Maletines de trabajo y laptops</li>
+            <li><span class="uc-check">✓</span>Cámaras, drones y equipo fotográfico</li>
           </ul>
         </div>
         <!-- Mascotas -->
-        <div class="usecase-card pets">
-          <span class="usecase-emoji">🐾</span>
-          <h3 class="usecase-title orange">Mascotas</h3>
-          <p class="usecase-desc">
-            Tu perro, gato o conejo con un collar Cerca.
-            Si se escapa, quien lo encuentre ve su nombre,
-            especie, raza, color e información médica importante.
-          </p>
-          <ul class="usecase-items">
-            <li>Perros y gatos domésticos</li>
-            <li>Animales con alergias o medicamentos</li>
-            <li>Mascotas con historial médico relevante</li>
-            <li>Cualquier animal con dueño identificado</li>
+        <div class="uc-card pets">
+          <span class="uc-emoji">🐾</span>
+          <h3 class="uc-title orange">Mascotas</h3>
+          <p class="uc-desc">Tu perro, gato o conejo con un collar Cerca. Si se escapa, quien lo encuentre ve su nombre,
+            especie, raza, color e información médica importante.</p>
+          <ul class="uc-list">
+            <li><span class="uc-check">✓</span>Perros y gatos domésticos</li>
+            <li><span class="uc-check">✓</span>Animales con alergias o medicamentos</li>
+            <li><span class="uc-check">✓</span>Mascotas con historial médico relevante</li>
+            <li><span class="uc-check">✓</span>Cualquier animal con dueño identificado</li>
           </ul>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- How it works -->
-  <section class="how-it-works" id="como-funciona">
+  <!-- ══ CÓMO FUNCIONA ══ -->
+  <section class="steps-section" id="como-funciona">
     <div class="container">
-      <div class="section-header">
-        <div class="section-tag">Proceso simple</div>
+      <div class="section-header-center">
+        <div class="section-label">Proceso simple</div>
         <h2 class="section-title">Funciona en 4 pasos</h2>
-        <p class="section-subtitle">Desde que recibes el chip hasta que recuperas lo perdido</p>
+        <p class="section-sub">Desde que recibes el chip hasta que recuperas lo perdido</p>
       </div>
-      <div class="steps">
-        <div class="step">
-          <div class="step-number">1</div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">1</div>
           <div class="step-title">Compra tu chip</div>
-          <div class="step-desc">Recibes un chip NFC con ID único impreso, listo para usar</div>
+          <div class="step-desc">Recibes un chip NFC con ID único impreso, listo para usar en el momento</div>
         </div>
-        <div class="step">
-          <div class="step-number">2</div>
+        <div class="step-card">
+          <div class="step-num">2</div>
           <div class="step-title">Regístrate</div>
-          <div class="step-desc">Crea tu cuenta y enlaza el chip (objeto o mascota) con tus datos</div>
+          <div class="step-desc">Crea tu cuenta y enlaza el chip (objeto o mascota) con tus datos de contacto</div>
         </div>
-        <div class="step">
-          <div class="step-number">3</div>
+        <div class="step-card">
+          <div class="step-num">3</div>
           <div class="step-title">Coloca el chip</div>
-          <div class="step-desc">En tu mochila, maleta, o en el collar de tu mascota</div>
+          <div class="step-desc">En tu mochila, maleta, o en el collar de tu mascota. Listo y protegido</div>
         </div>
-        <div class="step">
-          <div class="step-number">4</div>
+        <div class="step-card">
+          <div class="step-num">4</div>
           <div class="step-title">¡Te devuelven!</div>
           <div class="step-desc">Quien lo encuentra escanea el chip y puede contactarte al instante</div>
         </div>
@@ -488,83 +1054,96 @@
     </div>
   </section>
 
-  <!-- Features -->
-  <section class="features">
+  <!-- ══ CARACTERÍSTICAS (Bento) ══ -->
+  <section class="features-section">
     <div class="container">
-      <div class="section-header">
-        <div class="section-tag">Características</div>
+      <div class="section-header-center">
+        <div class="section-label">Características</div>
         <h2 class="section-title">Todo lo que necesitas</h2>
-        <p class="section-subtitle">Simple para quien lo encuentra, seguro para el dueño</p>
+        <p class="section-sub">Simple para quien lo encuentra, seguro para el dueño</p>
       </div>
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon violet">🔒</div>
-          <div class="feature-title">Privacidad total</div>
-          <div class="feature-desc">Tu teléfono y email nunca se muestran en texto. Solo botones de contacto seguros.</div>
+      <div class="bento-grid">
+        <div class="bento-card span2">
+          <div class="bento-icon v">🔒</div>
+          <div class="bento-title">Privacidad total garantizada</div>
+          <div class="bento-desc">Tu teléfono y email nunca se muestran en texto plano. Solo botones de contacto
+            seguros: WhatsApp, llamada o email. La persona que te encuentra puede contactarte sin ver tus datos reales.
+          </div>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon cyan">📡</div>
-          <div class="feature-title">Sin apps necesarias</div>
-          <div class="feature-desc">Cualquier iPhone o Android moderno escanea el chip directamente. Sin descargas.</div>
+        <div class="bento-card accent-card">
+          <div class="bento-icon">📡</div>
+          <div class="bento-title">Sin apps necesarias</div>
+          <div class="bento-desc">Cualquier iPhone o Android moderno escanea el chip directamente. Sin descargas, sin
+            cuentas.</div>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon orange">🐾</div>
-          <div class="feature-title">Módulo para mascotas</div>
-          <div class="feature-desc">Muestra especie, raza, color, edad e información médica importante al que encuentre a tu mascota.</div>
+        <div class="bento-card">
+          <div class="bento-icon o">🐾</div>
+          <div class="bento-title">Módulo para mascotas</div>
+          <div class="bento-desc">Muestra especie, raza, color, edad e información médica al que encuentre a tu mascota.
+          </div>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon magenta">📊</div>
-          <div class="feature-title">Historial de escaneos</div>
-          <div class="feature-desc">Sabe cuándo y desde qué dispositivo fue escaneado tu chip. Registro completo.</div>
+        <div class="bento-card">
+          <div class="bento-icon p">📊</div>
+          <div class="bento-title">Historial de escaneos</div>
+          <div class="bento-desc">Sabe cuándo y desde dónde fue escaneado tu chip. Registro completo con país y ciudad.
+          </div>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon blue">🎛️</div>
-          <div class="feature-title">Múltiples objetos y mascotas</div>
-          <div class="feature-desc">Registra tantos chips como quieras. Mezcla objetos y mascotas en un mismo panel.</div>
+        <div class="bento-card">
+          <div class="bento-icon b">🎛️</div>
+          <div class="bento-title">Múltiples objetos y mascotas</div>
+          <div class="bento-desc">Registra tantos chips como quieras. Mezcla objetos y mascotas en un mismo panel.</div>
         </div>
-        <div class="feature-card">
-          <div class="feature-icon red">⚡</div>
-          <div class="feature-title">Actualización instantánea</div>
-          <div class="feature-desc">¿Cambiaste de número? Actualiza tus datos y el chip lo refleja al instante, sin reprogramarlo.</div>
+        <div class="bento-card">
+          <div class="bento-icon g">⚡</div>
+          <div class="bento-title">Actualización instantánea</div>
+          <div class="bento-desc">¿Cambiaste de número? Actualiza tus datos y el chip lo refleja al instante, sin
+            reprogramarlo.</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- App mobile CTA -->
-  <section class="app-cta-section">
+  <!-- ══ APP MÓVIL ══ -->
+  <section class="app-section">
     <div class="container">
-      <div class="section-header">
-        <div class="section-tag">App Móvil</div>
+      <div class="section-header-center">
+        <div class="section-label">App Móvil</div>
         <h2 class="section-title">Gestiona desde tu celular</h2>
-        <p class="section-subtitle">Próximamente disponible en App Store y Google Play</p>
+        <p class="section-sub">Próximamente disponible en App Store y Google Play</p>
       </div>
-      <div class="app-cta-grid">
-        <div class="store-card">
-          <span class="store-icon">🍎</span>
-          <div class="store-name">App Store</div>
-          <div class="store-desc">Disponible para iPhone y iPad. Gestiona tus tags y mascotas desde iOS.</div>
-          <span class="badge badge-scan" style="font-size:0.8rem; padding: 6px 16px;">Próximamente</span>
+      <div class="app-grid">
+        <div class="app-card">
+          <span class="app-icon">🍎</span>
+          <div class="app-name">App Store</div>
+          <div class="app-desc">Disponible para iPhone y iPad. Gestiona tus tags y mascotas desde iOS.</div>
+          <span class="app-badge">Próximamente</span>
         </div>
-        <div class="store-card">
-          <span class="store-icon">🤖</span>
-          <div class="store-name">Google Play</div>
-          <div class="store-desc">Para todos los dispositivos Android. Recibe notificaciones de escaneos.</div>
-          <span class="badge badge-scan" style="font-size:0.8rem; padding: 6px 16px;">Próximamente</span>
+        <div class="app-card">
+          <span class="app-icon">🤖</span>
+          <div class="app-name">Google Play</div>
+          <div class="app-desc">Para todos los dispositivos Android. Recibe notificaciones de escaneos en tiempo real.
+          </div>
+          <span class="app-badge">Próximamente</span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Final CTA -->
+  <!-- ══ FINAL CTA ══ -->
   <section class="cta-section">
     <div class="container">
-      <div class="cta-card">
-        <h2 class="cta-title">Todo lo que quieres<br/>siempre tiene<br/><span class="highlight">forma de volver</span></h2>
-        <p class="cta-desc">Protege tu equipaje de viaje y tus mascotas hoy mismo. Es gratis y toma menos de 2 minutos.</p>
-        <a href="register.html" class="btn btn-primary" style="padding: 16px 40px; font-size: 1rem;">
-          🏷️ Crear mi cuenta gratis
-        </a>
+      <div class="cta-inner">
+        <h2 class="cta-title">
+          Todo lo que quieres<br />
+          siempre tiene<br />
+          <span class="hi">forma de volver.</span>
+        </h2>
+        <p class="cta-desc">Protege tu equipaje de viaje y tus mascotas hoy mismo. Es gratis y toma menos de 2 minutos.
+        </p>
+        <div class="cta-btns">
+          <a href="register.html" class="btn-white">🏷️ Crear mi cuenta gratis</a>
+          <a href="login.html" class="btn-outline-white">Ya tengo cuenta</a>
+        </div>
       </div>
     </div>
   </section>
@@ -572,7 +1151,7 @@
   <!-- Footer -->
   <footer class="footer">
     <div class="container">
-      <p>© 2024 Cerca · Tecnología NFC para equipaje y mascotas · Hecho con ❤️</p>
+      <p>© 2025 Cerca · Tecnología NFC para equipaje y mascotas · Hecho con ❤️</p>
     </div>
   </footer>
 
@@ -589,4 +1168,5 @@
     }
   </script>
 </body>
+
 </html>
