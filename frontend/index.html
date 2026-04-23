@@ -18,7 +18,7 @@
     .hero-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 80px;
+      gap: 60px;
       align-items: center;
     }
     .hero-badge {
@@ -68,6 +68,19 @@
       gap: 14px;
       flex-wrap: wrap;
       animation: fadeInUp 0.9s ease;
+    }
+    /* Imagen grande del hero que se extiende */
+    .hero-image {
+      position: relative;
+      overflow: visible;
+      display: flex;
+      align-items: center;
+    }
+    .hero-image img {
+      width: 100%;
+      max-width: 700px;
+      border-radius: 24px;
+      margin-bottom: -80px;
     }
     /* Dual visual cards */
     .hero-visual {
@@ -295,18 +308,50 @@
 
     /* ── Responsive ── */
     @media (max-width: 900px) {
-      .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+      .hero { padding: 60px 0 40px; }
+      .hero-grid { grid-template-columns: 1fr; gap: 32px; }
+      .hero-title { font-size: clamp(1.8rem, 8vw, 2.5rem); }
+      .hero-desc { font-size: 1rem; max-width: 100%; }
+      .hero-cta { flex-direction: column; }
+      .hero-cta .btn { width: 100%; justify-content: center; }
+      .hero-image { display: none; }
       .hero-visual { max-width: 400px; margin: 0 auto; }
-      .features-grid { grid-template-columns: 1fr 1fr; }
-      .steps { grid-template-columns: repeat(2, 1fr); }
+      .section-title { font-size: 1.6rem; }
+      .features-grid { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr; gap: 24px; }
       .steps::before { display: none; }
       .use-cases-grid { grid-template-columns: 1fr; }
+      .usecase-card { padding: 28px 24px; }
       .app-cta-grid { grid-template-columns: 1fr; }
-      .cta-card { padding: 48px 28px; }
-      .cta-title { font-size: 2rem; }
+      .cta-card { padding: 40px 24px; }
+      .cta-title { font-size: 1.8rem; }
     }
     @media (max-width: 600px) {
       .features-grid { grid-template-columns: 1fr; }
+      .hero-badge { font-size: 0.7rem; padding: 4px 12px; }
+    }
+    /* ── Mobile Menu ── */
+    .mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-primary); padding: 8px; }
+    .nav-close-btn { display: none; }
+    @media (max-width: 768px) {
+      .mobile-menu-btn { display: block; }
+      .nav-links {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: var(--bg-card);
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        z-index: 300;
+        margin: 0;
+      }
+      .nav-links.open { transform: translateX(0); }
+      .nav-close-btn { display: block; position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--text-primary); }
+      .nav-links a { font-size: 1.2rem; padding: 12px 24px; }
+      .nav-links .btn { width: 200px; text-align: center; }
     }
   </style>
 </head>
@@ -319,9 +364,11 @@
           <img src="img/logo.png" alt="Cerca Logo" class="logo-img" />
           <span style="background: linear-gradient(to right,#4F46E5,#6366F1,#8B5CF6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">Cerca</span>
         </a>
+        <button class="mobile-menu-btn" id="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
         <div class="nav-links" id="nav-links">
-          <a href="#como-funciona">¿Cómo funciona?</a>
-          <a href="#usos">Equipaje & Mascotas</a>
+          <button class="nav-close-btn" id="nav-close-btn" onclick="toggleMobileMenu()">✕</button>
+          <a href="#como-funciona" onclick="toggleMobileMenu()">¿Cómo funciona?</a>
+          <a href="#usos" onclick="toggleMobileMenu()">Equipaje & Mascotas</a>
           <a href="login.html" class="btn btn-secondary btn-sm" id="nav-login">Iniciar sesión</a>
           <a href="register.html" class="btn btn-primary btn-sm" id="nav-register">Comenzar gratis</a>
         </div>
@@ -338,15 +385,12 @@
             📡 Tecnología NFC · Sin app · Para equipaje y mascotas
           </div>
           <h1 class="hero-title">
-            Lo que más importa<br/>
-            siempre tiene<br/>
-            <span class="highlight">cómo volver</span>
+            Lo que amas,<br/>
+            siempre encuentra<br/>
+            <span class="highlight">el camino de vuelta.</span>
           </h1>
           <p class="hero-desc">
-            Un chip NFC inteligente en tu mochila, maleta <strong>o collar de mascota</strong>.
-            Si se pierde, quien lo encuentre escanea el chip
-            y puede contactarte al instante.
-            <strong>Sin apps. Sin instalaciones.</strong>
+            Un chip NFC en tu mascota o tus objetos que permite que quien lo encuentre te contacte al instante.
           </p>
           <div class="hero-cta">
             <a href="register.html" class="btn btn-primary">
@@ -358,27 +402,9 @@
           </div>
         </div>
 
-        <!-- Visual grid -->
-        <div class="hero-visual">
-          <div class="hero-nfc-pulse">
-            <div class="pulse-dot">📶</div>
-            <div class="pulse-text">
-              <div class="t1">Chip NFC escaneado</div>
-              <div class="t2">Redirigiendo al contacto del dueño...</div>
-            </div>
-          </div>
-          <div class="hero-float-card">
-            <span class="float-icon">🎒</span>
-            <span class="float-label">Mochila de viaje</span>
-            <span class="float-sub">Juan García · Activo</span>
-            <span class="float-badge purple">🎒 Objeto</span>
-          </div>
-          <div class="hero-float-card pet">
-            <span class="float-icon">🐕</span>
-            <span class="float-label">Luna — Golden Retriever</span>
-            <span class="float-sub">María G. · 2 años · Activa</span>
-            <span class="float-badge orange">🐾 Mascota</span>
-          </div>
+        <!-- Imagen derecha -->
+        <div class="hero-image">
+          <img src="img/mascota-hero.png" alt="Mascota con chip NFC Cerca" />
         </div>
       </div>
     </div>
@@ -557,6 +583,9 @@
       document.getElementById('nav-login').href = 'dashboard.html';
       document.getElementById('nav-register').textContent = 'Mis Tags';
       document.getElementById('nav-register').href = 'dashboard.html';
+    }
+    function toggleMobileMenu() {
+      document.getElementById('nav-links').classList.toggle('open');
     }
   </script>
 </body>

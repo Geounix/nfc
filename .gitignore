@@ -1,0 +1,72 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+*.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Database
+*.sqlite
+*.sqlite3
+dump.rdb
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+jest.config.js
+jest.setup.js
+tests/
+__tests__/
+
+# Backend specifics
+migrations/
+*.sql.bak
+
+# Mobile specifics
+.metro/
+.expo/
+android/
+ios/
+*.ipa
+*.apk
+
+# Misc
+*.log
+.vercel
+.turbo
+.tmp/
+.temp/
+.cache/
