@@ -17,7 +17,7 @@ function getTransporter() {
   // Otherwise, return a dummy transporter that just logs to console
   return {
     sendMail: async (mailOptions) => {
-      console.log('--- 📧 EMAIL SIMULADO (Añade SMTP_HOST en .env para correos reales) ---');
+      console.log('--- EMAIL SIMULADO (Añade SMTP_HOST en .env para correos reales) ---');
       console.log(`De: ${mailOptions.from}`);
       console.log(`Para: ${mailOptions.to}`);
       console.log(`Asunto: ${mailOptions.subject}`);
@@ -33,7 +33,7 @@ async function sendResetPasswordEmail(to, token) {
   
   // Asumimos que el backend está corriendo en el host, la URL de reset podría variar en prod
   const appUrl = process.env.APP_URL || 'http://localhost:3000';
-  const resetLink = `${appUrl}/reset.html?token=${token}`;
+  const resetLink = `${appUrl}/reset-password.html?token=${token}`;
 
   const mailOptions = {
     from: process.env.MAIL_FROM || '"Equipo Cerca" <noreply@cerca.app>',
@@ -62,4 +62,35 @@ async function sendResetPasswordEmail(to, token) {
   }
 }
 
-module.exports = { sendResetPasswordEmail };
+/**
+ * Envía notificación cuando se cambia la contraseña exitosamente
+ * @param {string} to - Email del usuario
+ * @param {string} nombre - Nombre del usuario
+ */
+async function sendPasswordChangeNotification(to, nombre) {
+  const transporter = getTransporter();
+
+  const mailOptions = {
+    from: process.env.MAIL_FROM || '"Equipo Cerca" <noreply@cerca.app>',
+    to,
+    subject: 'Tu contraseña ha sido cambiada - Cerca',
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+        <h2>Contraseña actualizada</h2>
+        <p>Hola ${nombre},</p>
+        <p>Te informamos que la contraseña de tu cuenta en <b>Cerca</b> ha sido actualizada exitosamente.</p>
+        <p><strong>Si no realizaste este cambio</strong>, por favor contacta con nuestro equipo de soporte inmediatamente.</p>
+        <p>Saludos,<br/>El Equipo de Cerca</p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.error('Error enviando notificación de cambio de contraseña:', error);
+    // No lanzar error para no romper el flujo de reset
+  }
+}
+
+module.exports = { sendResetPasswordEmail, sendPasswordChangeNotification };

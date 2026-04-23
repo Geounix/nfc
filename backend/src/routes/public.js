@@ -1,8 +1,13 @@
 const express = require('express');
 const { getDb } = require('../config/database');
 const http = require('http');
+const { logger } = require('../utils/logger');
 
 const router = express.Router();
+
+// Almacén en memoria para tracking de IPs (en prod usar Redis)
+const ipTracking = new Map();
+const SCRAPING_THRESHOLD = 10; // Máximo de tags distintos por IP en 5 minutos
 
 function getGeoData(ip) {
   return new Promise(resolve => {
@@ -24,10 +29,66 @@ function getGeoData(ip) {
   });
 }
 
+/**
+ * Verifica si una IP está haciendo scraping excesivo
+ * @param {string} ip - Dirección IP del cliente
+ * @param {string} tagId - ID del tag solicitado
+ * @returns {boolean} true si se detecta scraping
+ */
+function isScrapingAttempt(ip, tagId) {
+  const now = Date.now();
+  const trackingData = ipTracking.get(ip);
+  
+  if (!trackingData) {
+    ipTracking.set(ip, { tags: new Set([tagId]), timestamp: now });
+    return false;
+  }
+  
+  // Limpiar datos antiguos (más de 5 minutos)
+  if (now - trackingData.timestamp > 5 * 60 * 1000) {
+    ipTracking.set(ip, { tags: new Set([tagId]), timestamp: now });
+    return false;
+  }
+  
+  // Agregar tag a la lista
+  trackingData.tags.add(tagId);
+  
+  // Verificar si excedió el umbral
+  if (trackingData.tags.size > SCRAPING_THRESHOLD) {
+    logger.warn('Scraping attempt detected', { ip, tagCount: trackingData.tags.size });
+    return true;
+  }
+  
+  return false;
+}
+
+// Limpiar tracking cada 10 minutos
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, data] of ipTracking.entries()) {
+    if (now - data.timestamp > 10 * 60 * 1000) {
+      ipTracking.delete(ip);
+    }
+  }
+}, 10 * 60 * 1000);
+
 // GET /api/tag/:id — Datos públicos del tag (JSON para el frontend)
+// Con protección anti-scraping
 router.get('/:id', async (req, res) => {
   try {
     const tagId = req.params.id.toUpperCase();
+    const rawIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'desconocida';
+    const ip = rawIp.replace('::ffff:', '').trim();
+    
+    // Verificar si es intento de scraping
+    if (isScrapingAttempt(ip, tagId)) {
+      logger.warn('Blocked scraping attempt', { ip, tagId });
+      return res.status(429).json({ 
+        error: 'Demasiadas solicitudes. Por favor intenta más tarde.',
+        retryAfter: 300 // segundos
+      });
+    }
+    
     const db = getDb();
 
     const tagRes = await db.query(`
@@ -45,10 +106,6 @@ router.get('/:id', async (req, res) => {
       return res.status(403).json({ error: 'Este tag ha sido desactivado por su dueño.' });
     }
 
-    // Registrar escaneo
-    const rawIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'desconocida';
-    // Limpiar IP en caso de IPs compuestas como ::ffff:192.168.x.x
-    const ip = rawIp.replace('::ffff:', '').trim();
     const userAgent = req.headers['user-agent'] || 'desconocido';
 
     // Obtener ubicación de la IP en background (asíncrono sin bloquear la respuesta)
@@ -79,7 +136,7 @@ router.get('/:id', async (req, res) => {
     const whatsappLink = `https://wa.me/${tag.telefono.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappText)}`;
     const emailLink   = `mailto:${tag.email}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
 
-    // Respuesta base
+    // Respuesta base — no expone IDs internos para seguridad
     const response = {
       tipo: tag.tipo || 'objeto',
       nombre_dueno: tag.nombre_dueno,

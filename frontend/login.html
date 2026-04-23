@@ -44,6 +44,9 @@
     .auth-footer { text-align: center; margin-top: 24px; font-size: 0.88rem; color: var(--text-muted); }
     .auth-footer a { color: var(--accent-light); font-weight: 500; }
     .divider { border: none; border-top: 1px solid var(--glass-border); margin: 24px 0; }
+    .auth-forgot-password { text-align: center; margin-top: 16px; }
+    .auth-forgot-password a { color: var(--accent-light); font-weight: 500; font-size: 0.9rem; }
+    .forgot-form { margin-top: 20px; }
   </style>
 </head>
 <body>
@@ -54,88 +57,254 @@
         <span style="font-size: 1.8rem; font-weight: 900; letter-spacing: -0.5px;">Cerca</span>
       </a>
 
-      <h1 class="auth-title">Bienvenido de vuelta</h1>
-      <p class="auth-subtitle">Ingresa a tu cuenta para gestionar tus tags NFC</p>
+      <!-- Login Form -->
+      <div id="login-section">
+        <h1 class="auth-title">Bienvenido de vuelta</h1>
+        <p class="auth-subtitle">Ingresa a tu cuenta para gestionar tus tags NFC</p>
 
-      <div class="alert alert-error" id="alert-error">
-        <span>⚠️</span>
-        <span id="alert-error-msg"></span>
-      </div>
-      <div class="alert alert-success" id="alert-success">
-        <span>✅</span>
-        <span id="alert-success-msg"></span>
-      </div>
-
-      <form id="login-form" novalidate>
-        <div class="form-group">
-          <label class="form-label" for="email">Correo electrónico</label>
-          <input
-            class="form-input"
-            type="email"
-            id="email"
-            name="email"
-            placeholder="tu@correo.com"
-            autocomplete="email"
-            required
-          />
+        <div class="alert alert-error" id="alert-error">
+          <span>⚠️</span>
+          <span id="alert-error-msg"></span>
+        </div>
+        <div class="alert alert-success" id="alert-success">
+          <span>✅</span>
+          <span id="alert-success-msg"></span>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="password">Contraseña</label>
-          <input
-            class="form-input"
-            type="password"
-            id="password"
-            name="password"
-            placeholder="••••••••"
-            autocomplete="current-password"
-            required
-          />
+        <form id="login-form" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="email">Correo electrónico</label>
+            <input
+              class="form-input"
+              type="email"
+              id="email"
+              name="email"
+              placeholder="tu@correo.com"
+              autocomplete="email"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Contraseña</label>
+            <input
+              class="form-input"
+              type="password"
+              id="password"
+              name="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full" id="btn-login">
+            Iniciar sesión
+          </button>
+          
+          <div class="auth-forgot-password">
+            <a href="#" id="forgot-password-link">¿Olvidaste tu contraseña?</a>
+          </div>
+        </form>
+
+        <hr class="divider" />
+        <div class="auth-footer">
+          ¿No tienes cuenta? <a href="register.html">Regístrate gratis</a>
         </div>
+      </div>
 
-        <button type="submit" class="btn btn-primary btn-full" id="btn-login">
-          Iniciar sesión
-        </button>
-      </form>
+      <!-- Forgot Password Form (oculto por defecto) -->
+      <div id="forgot-section" style="display: none;">
+        <h1 class="auth-title">Recuperar contraseña</h1>
+        <p class="auth-subtitle">Ingresa tu correo electrónico para recibir un enlace de recuperación</p>
+        
+        <div class="alert alert-error" id="alert-error-forgot">
+          <span>⚠️</span>
+          <span id="alert-error-msg-forgot"></span>
+        </div>
+        <div class="alert alert-success" id="alert-success-forgot">
+          <span>✅</span>
+          <span id="alert-success-msg-forgot"></span>
+        </div>
+        
+        <form id="forgot-form" novalidate class="forgot-form">
+          <div class="form-group">
+            <label class="form-label" for="forgot-email">Correo electrónico</label>
+            <input
+              class="form-input"
+              type="email"
+              id="forgot-email"
+              name="email"
+              placeholder="tu@correo.com"
+              autocomplete="email"
+              required
+            />
+          </div>
+          
+          <button type="submit" class="btn btn-secondary btn-full" id="btn-forgot">
+            Enviar enlace de recuperación
+          </button>
+          
+          <div class="auth-forgot-password" style="margin-top: 16px;">
+            <a href="#" id="back-to-login">Volver al login</a>
+          </div>
+        </form>
+      </div>
 
-      <hr class="divider" />
-      <div class="auth-footer">
-        ¿No tienes cuenta? <a href="register.html">Regístrate gratis</a>
+      <!-- Reset Password Form (para cuando ya tiene el token) -->
+      <div id="reset-section" style="display: none;">
+        <h1 class="auth-title">Nueva contraseña</h1>
+        <p class="auth-subtitle">Ingresa tu nueva contraseña</p>
+        
+        <div class="alert alert-error" id="alert-error-reset">
+          <span>⚠️</span>
+          <span id="alert-error-msg-reset"></span>
+        </div>
+        <div class="alert alert-success" id="alert-success-reset">
+          <span>✅</span>
+          <span id="alert-success-msg-reset"></span>
+        </div>
+        
+        <form id="reset-form" novalidate class="forgot-form">
+          <input type="hidden" id="reset-token" />
+          
+          <div class="form-group">
+            <label class="form-label" for="new-password">Nueva contraseña</label>
+            <input
+              class="form-input"
+              type="password"
+              id="new-password"
+              name="password"
+              placeholder="••••••••"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="confirm-password">Confirmar contraseña</label>
+            <input
+              class="form-input"
+              type="password"
+              id="confirm-password"
+              name="confirmPassword"
+              placeholder="••••••••"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+          
+          <button type="submit" class="btn btn-primary btn-full" id="btn-reset">
+            Cambiar contraseña
+          </button>
+          
+          <div class="auth-forgot-password" style="margin-top: 16px;">
+            <a href="login.html">Volver al login</a>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 
   <script src="js/auth.js"></script>
   <script>
-    // Redirect if already logged in
-    if (localStorage.getItem('safetag_token')) {
+    // Redirect if already logged in (solo para login y reset con token)
+    const urlParams = new URLSearchParams(window.location.search);
+    const resetToken = urlParams.get('token');
+    
+    if (localStorage.getItem('safetag_token') && !resetToken) {
       window.location.href = 'dashboard.html';
     }
 
-    const form = document.getElementById('login-form');
-    const btnLogin = document.getElementById('btn-login');
+    // Elementos del DOM
+    const loginSection = document.getElementById('login-section');
+    const forgotSection = document.getElementById('forgot-section');
+    const resetSection = document.getElementById('reset-section');
+    
+    // Alertas de login
     const alertError = document.getElementById('alert-error');
     const alertErrorMsg = document.getElementById('alert-error-msg');
     const alertSuccess = document.getElementById('alert-success');
     const alertSuccessMsg = document.getElementById('alert-success-msg');
+    
+    // Alertas de forgot
+    const alertErrorForgot = document.getElementById('alert-error-forgot');
+    const alertErrorMsgForgot = document.getElementById('alert-error-msg-forgot');
+    const alertSuccessForgot = document.getElementById('alert-success-forgot');
+    const alertSuccessMsgForgot = document.getElementById('alert-success-msg-forgot');
+    
+    // Alertas de reset
+    const alertErrorReset = document.getElementById('alert-error-reset');
+    const alertErrorMsgReset = document.getElementById('alert-error-msg-reset');
+    const alertSuccessReset = document.getElementById('alert-success-reset');
+    const alertSuccessMsgReset = document.getElementById('alert-success-msg-reset');
+    
+    const form = document.getElementById('login-form');
+    const btnLogin = document.getElementById('btn-login');
+    const btnForgot = document.getElementById('btn-forgot');
+    const btnReset = document.getElementById('btn-reset');
 
-    function showError(msg) {
+    function showErrorLogin(msg) {
       alertError.classList.add('show');
       alertErrorMsg.textContent = msg;
       alertSuccess.classList.remove('show');
     }
-    function showSuccess(msg) {
+    function showSuccessLogin(msg) {
       alertSuccess.classList.add('show');
       alertSuccessMsg.textContent = msg;
       alertError.classList.remove('show');
     }
+    function showErrorForgot(msg) {
+      alertErrorForgot.classList.add('show');
+      alertErrorMsgForgot.textContent = msg;
+      alertSuccessForgot.classList.remove('show');
+    }
+    function showSuccessForgot(msg) {
+      alertSuccessForgot.classList.add('show');
+      alertSuccessMsgForgot.textContent = msg;
+      alertErrorForgot.classList.remove('show');
+    }
+    function showErrorReset(msg) {
+      alertErrorReset.classList.add('show');
+      alertErrorMsgReset.textContent = msg;
+      alertSuccessReset.classList.remove('show');
+    }
+    function showSuccessReset(msg) {
+      alertSuccessReset.classList.add('show');
+      alertSuccessMsgReset.textContent = msg;
+      alertErrorReset.classList.remove('show');
+    }
 
+    // Mostrar sección según corresponda
+    if (resetToken) {
+      loginSection.style.display = 'none';
+      forgotSection.style.display = 'none';
+      resetSection.style.display = 'block';
+      document.getElementById('reset-token').value = resetToken;
+    }
+
+    // Navegación entre secciones
+    document.getElementById('forgot-password-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      loginSection.style.display = 'none';
+      forgotSection.style.display = 'block';
+      resetSection.style.display = 'none';
+    });
+
+    document.getElementById('back-to-login').addEventListener('click', (e) => {
+      e.preventDefault();
+      loginSection.style.display = 'block';
+      forgotSection.style.display = 'none';
+      resetSection.style.display = 'none';
+    });
+
+    // Login
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
 
-      if (!email || !password) return showError('Por favor completa todos los campos.');
+      if (!email || !password) return showErrorLogin('Por favor completa todos los campos.');
 
       btnLogin.disabled = true;
       btnLogin.innerHTML = '<div class="spinner"></div> Ingresando...';
@@ -149,7 +318,7 @@
         const data = await res.json();
 
         if (!res.ok) {
-          showError(data.error || 'Error al iniciar sesión.');
+          showErrorLogin(data.error || 'Error al iniciar sesión.');
           btnLogin.disabled = false;
           btnLogin.textContent = 'Iniciar sesión';
           return;
@@ -157,12 +326,97 @@
 
         localStorage.setItem('safetag_token', data.token);
         localStorage.setItem('safetag_user', JSON.stringify(data.user));
-        showSuccess('¡Bienvenido! Redirigiendo...');
+        showSuccessLogin('¡Bienvenido! Redirigiendo...');
         setTimeout(() => window.location.href = 'dashboard.html', 1000);
       } catch {
-        showError('Error de conexión. Verifica que el servidor esté activo.');
+        showErrorLogin('Error de conexión. Verifica que el servidor esté activo.');
         btnLogin.disabled = false;
         btnLogin.textContent = 'Iniciar sesión';
+      }
+    });
+
+    // Forgot Password
+    document.getElementById('forgot-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('forgot-email').value.trim();
+
+      if (!email) return showErrorForgot('Por favor ingresa tu correo electrónico.');
+
+      btnForgot.disabled = true;
+      btnForgot.innerHTML = '<div class="spinner"></div> Enviando...';
+
+      try {
+        const res = await fetch('/api/auth/forgot-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showErrorForgot(data.error || 'Error al procesar la solicitud.');
+          btnForgot.disabled = false;
+          btnForgot.textContent = 'Enviar enlace de recuperación';
+          return;
+        }
+
+        showSuccessForgot('Si el correo existe, recibirás un enlace para restablecer tu contraseña.');
+        btnForgot.style.display = 'none';
+      } catch {
+        showErrorForgot('Error de conexión. Verifica que el servidor esté activo.');
+        btnForgot.disabled = false;
+        btnForgot.textContent = 'Enviar enlace de recuperación';
+      }
+    });
+
+    // Reset Password
+    document.getElementById('reset-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const token = document.getElementById('reset-token').value;
+      const password = document.getElementById('new-password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+
+      if (!password || !confirmPassword) {
+        return showErrorReset('Por favor completa todos los campos.');
+      }
+      
+      if (password !== confirmPassword) {
+        return showErrorReset('Las contraseñas no coinciden.');
+      }
+      
+      if (password.length < 6) {
+        return showErrorReset('La contraseña debe tener al menos 6 caracteres.');
+      }
+
+      btnReset.disabled = true;
+      btnReset.innerHTML = '<div class="spinner"></div> Cambiando...';
+
+      try {
+        const res = await fetch('/api/auth/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showErrorReset(data.error || 'Error al restablecer la contraseña.');
+          btnReset.disabled = false;
+          btnReset.textContent = 'Cambiar contraseña';
+          return;
+        }
+
+        showSuccessReset('¡Contraseña actualizada! Ahora puedes iniciar sesión.');
+        btnReset.style.display = 'none';
+        
+        // Redirigir al login después de 2 segundos
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 2000);
+      } catch {
+        showErrorReset('Error de conexión. Verifica que el servidor esté activo.');
+        btnReset.disabled = false;
+        btnReset.textContent = 'Cambiar contraseña';
       }
     });
   </script>

@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { z } = require('zod');
 const { getDb } = require('../config/database');
-const { sendResetPasswordEmail } = require('../utils/mailer');
+const { sendResetPasswordEmail, sendPasswordChangeNotification } = require('../utils/mailer');
 const { logger } = require('../utils/logger');
 
 // Validar entorno al cargar el módulo
@@ -171,7 +171,7 @@ router.post('/login', async (req, res) => {
     const cleanEmail = sanitizeEmail(email);
 
     const db = getDb();
-    const userRes = await db.query('SELECT * FROM users WHERE email = $1', [cleanEmail]);
+    constuserRes = await db.query('SELECT * FROM users WHERE email = $1', [cleanEmail]);
     const user = userRes.rows[0];
 
     if (!user) {
@@ -237,6 +237,7 @@ router.get('/me', require('../middleware/auth'), async (req, res) => {
  * @param {string} email - Correo electrónico del usuario
  * @returns {Object} Mensaje de confirmación
  * @note Siempre retorna éxito para prevenir enumeración de usuarios
+ * @security Rate limited a 3 solicitudes por hora por IP (configurado en index.js)
  */
 router.post('/forgot-password', async (req, res) => {
   const correlationId = req.correlationId || 'unknown';
@@ -287,10 +288,11 @@ router.post('/forgot-password', async (req, res) => {
 
 /**
  * POST /api/auth/reset-password
- * @description Restablece contraseña usando token
+ * @description Restablece contraseña usando token (single-use)
  * @param {string} token - Token de recuperación (enviado por email)
  * @param {string} password - Nueva contraseña (mínimo 6 caracteres)
  * @returns {Object} Mensaje de confirmación
+ * @security El token se invalida tras uso y se envía notificación por email
  */
 router.post('/reset-password', async (req, res) => {
   const correlationId = req.correlationId || 'unknown';
@@ -307,8 +309,10 @@ router.post('/reset-password', async (req, res) => {
 
     const db = getDb();
     const now = Date.now();
+    
+    // Obtener usuario con token válido
     const userRes = await db.query(
-      'SELECT id FROM users WHERE reset_password_token = $1 AND reset_password_expires > $2',
+      'SELECT id, email, nombre FROM users WHERE reset_password_token = $1 AND reset_password_expires > $2',
       [hashedToken, now]
     );
     const user = userRes.rows[0];
@@ -318,8 +322,10 @@ router.post('/reset-password', async (req, res) => {
       return res.status(400).json({ error: 'El enlace de recuperación es inválido o ha expirado.' });
     }
 
+    // Hashear nueva contraseña
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // Invalidar token (single-use) y actualizar contraseña
     await db.query(
       'UPDATE users SET password = $1, reset_password_token = NULL, reset_password_expires = NULL WHERE id = $2',
       [hashedPassword, user.id]
@@ -327,6 +333,11 @@ router.post('/reset-password', async (req, res) => {
 
     logger.info('Password reset successfully', { correlationId, userId: user.id });
     logger.auth('password_reset', { correlationId, userId: user.id });
+
+    // Enviar notificación de cambio de contraseña
+    sendPasswordChangeNotification(user.email, user.nombre).catch(err => {
+      logger.error('Failed to send password change notification', { correlationId, userId: user.id, error: err.message });
+    });
 
     res.json({ message: 'Contraseña actualizada exitosamente. Ya puedes iniciar sesión.' });
   } catch (err) {

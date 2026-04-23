@@ -57,6 +57,15 @@ const authLimiter = rateLimit({
   message: { error: 'Demasiados intentos. Espera 15 minutos.' }
 });
 
+// Rate limiter específico para forgot-password (3 solicitudes por hora)
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hora
+  max: 3,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas solicitudes de recuperación. Espera 1 hora.' }
+});
+
 const tagScanLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minuto
   max: 30,
@@ -75,6 +84,7 @@ const apiLimiter = rateLimit({
 
 // ── Rutas API ──────────────────────────────────────────────────────────────────
 app.use('/api', apiLimiter); // Rate limit general para toda la API
+app.use('/api/auth/forgot-password', forgotPasswordLimiter); // Rate limit específico para forgot-password
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/tags', tagsRoutes);
 app.use('/api/tag', tagScanLimiter, publicRoutes);
@@ -94,14 +104,32 @@ app.get('/login', (req, res) => {
 app.get('/register', (req, res) => {
   res.sendFile(path.join(__dirname, '../../frontend/register.html'));
 });
+app.get('/reset-password.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../frontend/reset-password.html'));
+});
 
-// ── Health check (sin auth) ────────────────────────────────────────────────────
-app.get('/api/health', (req, res) => {
+// ── Health check (sin auth) - Verificación de dependencias ────────────────────
+const { getDb } = require('./config/database');
+
+app.get('/api/health', async (req, res) => {
+  let dbStatus = 'connected';
+  
+  try {
+    const pool = getDb();
+    await pool.query('SELECT 1');
+  } catch (err) {
+    dbStatus = 'disconnected';
+    logger.error('Health check - DB connection failed', { error: err.message });
+  }
+  
   res.json({
     status: 'ok',
     message: 'Cerca API funcionando correctamente',
     timestamp: new Date().toISOString(),
-    version: process.env.npm_package_version || '1.0.0'
+    version: process.env.npm_package_version || '1.0.0',
+    dependencies: {
+      database: dbStatus
+    }
   });
 });
 
@@ -143,6 +171,8 @@ initializeSchema().then(() => {
     console.log(`\n📡 Endpoints disponibles:`);
     console.log(`   POST   http://localhost:${PORT}/api/auth/register`);
     console.log(`   POST   http://localhost:${PORT}/api/auth/login`);
+    console.log(`   POST   http://localhost:${PORT}/api/auth/forgot-password`);
+    console.log(`   POST   http://localhost:${PORT}/api/auth/reset-password`);
     console.log(`   GET    http://localhost:${PORT}/api/tags`);
     console.log(`   POST   http://localhost:${PORT}/api/tags`);
     console.log(`   GET    http://localhost:${PORT}/api/tag/:id  (API JSON)`);

@@ -1,0 +1,235 @@
+{
+  "timestamp": 1776975808444,
+  "urlPath": "arq7lwvf70mk.space.minimax.io/",
+  "pageInfo": {
+    "url": "https://arq7lwvf70mk.space.minimax.io/",
+    "title": "Cerca — Tu equipaje y mascotas siempre tienen forma de volver",
+    "viewport": {
+      "width": 1093,
+      "height": 793
+    },
+    "scrollPosition": {
+      "x": 0,
+      "y": 0
+    },
+    "pageHeight": 4920,
+    "pageWidth": 1085,
+    "focusedElement": null
+  },
+  "elements": [
+    {
+      "index": 0,
+      "backendNodeId": 42,
+      "selector": "[data-backend-node-id=\"42\"]",
+      "tag": "a",
+      "type": "link",
+      "text": "Cerca Logo Cerca",
+      "normalizedPosition": {
+        "x": 0.097,
+        "y": 0.05
+      },
+      "boundingBox": {
+        "x": 24,
+        "y": 16,
+        "width": 165,
+        "height": 48
+      },
+      "isInViewport": true,
+      "isInteractable": true,
+      "attributes": {
+        "href": "/"
+      },
+      "paintOrder": 43
+    },
+    {
+      "index": 1,
+      "backendNodeId": 44,
+      "selector": "[data-backend-node-id=\"44\"]",
+      "tag": "img",
+      "type": "image",
+      "text": "Cerca Logo",
+      "normalizedPosition": {
+        "x": 0.055,
+        "y": 0.05
+      },
+      "boundingBox": {
+        "x": 24,
+        "y": 16,
+        "width": 72,
+        "height": 48
+      },
+      "isInViewport": true,
+      "isInteractable": true,
+      "attributes": {
+        "src": "img/logo.png"
+      },
+      "paintOrder": 44
+    },
+    {
+      "index": 2,
+      "backendNodeId": 55,
+      "selector": "[data-backend-node-id=\"55\"]",
+      "tag": "a",
+      "type": "link",
+      "text": "¿Cómo funciona?",
+      "normalizedPosition": {
+        "x": 0.49,
+        "y": 0.05
+      },
+      "boundingBox": {
+        "x": 460,
+        "y": 20,
+        "width": 152,
+        "height": 39
+      },
+      "isInViewport": true,
+      "isInteractable": true,
+      "attributes": {
+        "href": "#como-funciona"
+      },
+      "paintOrder": 43
+    },
+    {
+      "index": 3,
+      "backendNodeId": 8,
+      "selector": "[data-backend-node-id=\"8\"]",
+      "tag": "a",
+      "type": "link",
+      "text": "Equipaje & Mascotas",
+      "normalizedPosition": {
+        "x": 0.647,
+        "y": 0.05
+      },
+      "boundingBox": {
+        "x": 620,
+        "y": 20,
+        "width": 175,
+        "height": 39
+      },
+      "isInViewport": true,
+      "isInteractable": true,
+      "attributes": {
+        "href": "#usos"
+      },
+      "paintOrder": 43
+    },
+    {
+      "index": 4,
+      "backendNodeId": 58,
+      "selector": "[data-backend-node-id=\"58\"]",
+      "tag": "a",
+      "type": "link",
+      "text": "Iniciar sesión",
+      "normalizedPosition": {
+        "x": 0.788,
+        "y": 0.05
+      },
+      "boundingBox": {
+        "x": 803,
+        "y": 21,
+        "width": 116,
+        "height": 38
+      },
+      "isInViewport": true,
+      "isInteractable": true,
+      "attributes": {
+        "href": "login.html"
+      },
+      "paintOrder": 43
+    },
+    {
+      "index": 5,
+      "backendNodeId": 61,
+      "selector": "[data-backend-node-id=\"61\"]",
+      "tag": "a",
+      "type": "link",
+      "text": "Comenzar gratis",
+      "normalizedPosition": {
+        "x": 0.909,
+        "y": 0.05
+      },
+      "boundingBox": {
+        "x": 927,
+        "y": 22,
+        "width": 134,
+        "height": 36
+      },
+      "isInViewport": true,
+      "isInteractable": true,
+      "attributes": {
+        "href": "register.html"
+      },
+      "paintOrder": 43
+    },
+    {
+      "index": 6,
+      "backendNodeId": 535,
+      "selector": "[data-backend-node-id=\"535\"]",
+      "tag": "div",
+      "type": "generic",
+      "text": "",
+      "normalizedPosition": {
+        "x": 0.955,
+        "y": 0.95
+      },
+      "boundingBox": {
+        "x": 1035,
+        "y": 744,
+        "width": 18,
+        "height": 18
+      },
+      "isInViewport": true,
+      "isInteractable": true,
+      "attributes": {},
+      "paintOrder": 46
+    },
+    {
+      "index": 7,
+      "backendNodeId": 100,
+      "selector": "[data-backend-node-id=\"100\"]",
+      "tag": "a",
+      "type": "link",
+      "text": "🚀 Proteger mis cosas",
+      "normalizedPosition": {
+        "x": 0.153,
+        "y": 1.057
+      },
+      "boundingBox": {
+        "x": 60,
+        "y": 813,
+        "width": 213,
+        "height": 50
+      },
+      "isInViewport": false,
+      "isInteractable": true,
+      "attributes": {
+        "href": "register.html"
+      },
+      "paintOrder": 14
+    },
+    {
+      "index": 8,
+      "backendNodeId": 103,
+      "selector": "[data-backend-node-id=\"103\"]",
+      "tag": "a",
+      "type": "link",
+      "text": "Ver usos",
+      "normalizedPosition": {
+        "x": 0.315,
+        "y": 1.057
+      },
+      "boundingBox": {
+        "x": 287,
+        "y": 813,
+        "width": 114,
+        "height": 50
+      },
+      "isInViewport": false,
+      "isInteractable": true,
+      "attributes": {
+        "href": "#usos"
+      },
+      "paintOrder": 14
+    }
+  ]
+}
