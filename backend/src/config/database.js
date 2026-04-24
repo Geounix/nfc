@@ -9,7 +9,7 @@ function getDb() {
       host: process.env.PG_HOST || 'localhost',
       port: process.env.PG_PORT || 5432,
       user: process.env.PG_USER || 'postgres',
-      password: process.env.PG_PASSWORD || 'password',
+      password: process.env.PG_PASSWORD || 'admin',
       database: process.env.PG_DB || 'safetag',
       max: 20, // Máximo de conexiones en el pool
       idleTimeoutMillis: 30000,
