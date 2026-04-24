@@ -23,26 +23,25 @@ import {
   Download
 } from "lucide-react";
 
-// Usamos la imagen mascotas.png del proyecto NFC (en la carpeta public)
-const HERO_IMAGE = "/mascotas.png";
+// Usamos la imagen mascotas.png del proyecto NFC
+const HERO_IMAGE = "./mascotas.png";
+// Logo de Cerca
+const LOGO_IMAGE = "./logo.png";
 
 const Navbar = () => (
   <nav className="flex items-center justify-between px-6 md:px-8 py-4 max-w-7xl mx-auto w-full bg-white/80 backdrop-blur-md border-b border-indigo-100 sticky top-0 z-50">
-    <a href="/" className="flex items-center gap-2">
-      <div className="w-9 h-9 bg-indigo-600 rounded-full flex items-center justify-center">
-        <PawPrint className="text-white w-5 h-5" />
-      </div>
-      <span className="text-2xl font-bold text-indigo-900 tracking-tight font-display">Cerca</span>
+    <a href="/" className="flex items-center gap-3">
+      <img src={LOGO_IMAGE} alt="Cerca Logo" className="h-10 w-auto object-contain" />
     </a>
     
     <div className="hidden md:flex items-center gap-8 text-[15px] font-semibold text-gray-700">
       <a href="#como-funciona" className="hover:text-indigo-600 transition-colors">¿Cómo funciona?</a>
       <a href="#usos" className="hover:text-indigo-600 transition-colors">Equipaje & Mascotas</a>
       <div className="flex items-center gap-3 ml-4">
-        <a href="../login.html" className="px-5 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200">
+        <a href="/login" className="px-5 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200">
           Iniciar sesión
         </a>
-        <a href="../register.html" className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all shadow-[0_4px_14px_0_rgba(79,70,229,0.39)]">
+        <a href="/register" className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all shadow-[0_4px_14px_0_rgba(79,70,229,0.39)]">
           Comenzar gratis
         </a>
       </div>
@@ -90,7 +89,7 @@ const Hero = () => (
         </p>
         
         <div className="flex flex-wrap justify-center lg:justify-start gap-4">
-          <a href="../register.html" className="group relative px-8 py-4 bg-indigo-600 text-white rounded-full font-bold text-lg transition-all shadow-[0_20px_40px_-10px_rgba(79,70,229,0.4)] hover:shadow-[0_25px_50px_-12px_rgba(79,70,229,0.5)] hover:-translate-y-1 inline-flex items-center gap-3">
+          <a href="/register" className="group relative px-8 py-4 bg-indigo-600 text-white rounded-full font-bold text-lg transition-all shadow-[0_20px_40px_-10px_rgba(79,70,229,0.4)] hover:shadow-[0_25px_50px_-12px_rgba(79,70,229,0.5)] hover:-translate-y-1 inline-flex items-center gap-3">
             <span className="relative z-10 flex items-center gap-3">
               <PawPrint className="w-5 h-5 animate-pulse" />
               Proteger mi mundo
@@ -416,11 +415,11 @@ const FinalCTA = () => (
       </p>
       
       <div className="flex flex-wrap justify-center gap-4">
-        <a href="../register.html" className="group px-10 py-5 bg-white text-indigo-900 rounded-full font-bold text-lg hover:bg-indigo-50 transition-all shadow-2xl hover:shadow-white/20 hover:-translate-y-1 inline-flex items-center gap-3">
+        <a href="/register" className="group px-10 py-5 bg-white text-indigo-900 rounded-full font-bold text-lg hover:bg-indigo-50 transition-all shadow-2xl hover:shadow-white/20 hover:-translate-y-1 inline-flex items-center gap-3">
           <Tag className="w-5 h-5" />
           Crear mi cuenta gratis
         </a>
-        <a href="../login.html" className="px-10 py-5 bg-transparent border-2 border-white/30 text-white rounded-full font-bold text-lg hover:bg-white/10 transition-all inline-flex items-center gap-3">
+        <a href="/login" className="px-10 py-5 bg-transparent border-2 border-white/30 text-white rounded-full font-bold text-lg hover:bg-white/10 transition-all inline-flex items-center gap-3">
           <Download className="w-5 h-5" />
           Ya tengo cuenta
         </a>
@@ -432,11 +431,8 @@ const FinalCTA = () => (
 const Footer = () => (
   <footer className="bg-[#0f0a2e] py-8 text-center border-t border-indigo-900/30">
     <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-      <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
-          <PawPrint className="text-white w-4 h-4" />
-        </div>
-        <span className="text-lg font-bold text-white tracking-tight">Cerca</span>
+      <div className="flex items-center gap-3">
+        <img src={LOGO_IMAGE} alt="Cerca Logo" className="h-8 w-auto object-contain" />
       </div>
       <p className="text-indigo-300/50 text-sm">© 2025 Cerca NFC Tracker. Todos los derechos reservados.</p>
       <div className="flex gap-6 text-sm text-indigo-300 font-medium">

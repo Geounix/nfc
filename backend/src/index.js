@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const mime = require('mime');
 
 const authRoutes = require('./routes/auth');
 const tagsRoutes = require('./routes/tags');
@@ -15,6 +16,7 @@ validateEnvironment();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const FRONTEND_PATH = path.join(__dirname, '../../frontend/dist');
 
 // ── Middleware global ──────────────────────────────────────────────────────────
 
@@ -45,8 +47,27 @@ app.use(cors({
 app.use(express.json({ limit: '10kb' })); // Limitar tamaño del body
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
-// Servir archivos estáticos del frontend
-app.use(express.static(path.join(__dirname, '../../frontend')));
+// ── Servir archivos estáticos del frontend con MIME types correctos ────────────
+app.use(express.static(FRONTEND_PATH, {
+  setHeaders: (res, filePath) => {
+    const ext = path.extname(filePath);
+    if (ext === '.js' || ext === '.mjs') {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (ext === '.css') {
+      res.setHeader('Content-Type', 'text/css');
+    } else if (ext === '.html') {
+      res.setHeader('Content-Type', 'text/html');
+    } else if (ext === '.png') {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (ext === '.jpg' || ext === '.jpeg') {
+      res.setHeader('Content-Type', 'image/jpeg');
+    } else if (ext === '.svg') {
+      res.setHeader('Content-Type', 'image/svg+xml');
+    } else if (ext === '.ico') {
+      res.setHeader('Content-Type', 'image/x-icon');
+    }
+  }
+}));
 
 // ── Rate limiters ──────────────────────────────────────────────────────────────
 const authLimiter = rateLimit({
@@ -91,21 +112,27 @@ app.use('/api/tag', tagScanLimiter, publicRoutes);
 
 // Serve tag.html for /tag/:id so browsers get the visual page
 app.get('/tag/:id', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../frontend/tag.html'));
+  res.sendFile(path.join(FRONTEND_PATH, 'tag.html'));
 });
 
-// ── Rutas del frontend (SPA fallback) ─────────────────────────────────────────
+// ── Rutas del frontend ──────────────────────────────────────────
+
+// Landing page - sirve el index.html del frontend React
+app.get('/', (req, res) => {
+  res.sendFile(path.join(FRONTEND_PATH, 'index.html'));
+});
+
 app.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../frontend/dashboard.html'));
+  res.sendFile(path.join(FRONTEND_PATH, 'dashboard.html'));
 });
 app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../frontend/login.html'));
+  res.sendFile(path.join(FRONTEND_PATH, 'login.html'));
 });
 app.get('/register', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../frontend/register.html'));
+  res.sendFile(path.join(FRONTEND_PATH, 'register.html'));
 });
 app.get('/reset-password.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../frontend/reset-password.html'));
+  res.sendFile(path.join(FRONTEND_PATH, 'reset-password.html'));
 });
 
 // ── Health check (sin auth) - Verificación de dependencias ────────────────────
@@ -165,10 +192,10 @@ initializeSchema().then(() => {
       allowedOrigins: getAllowedOrigins()
     });
 
-    console.log(`\n🏷️  Cerca API corriendo en:`);
+    console.log(`\n🏷️  Cerca API + Frontend corriendo en:`);
     console.log(`   Local:    http://localhost:${PORT}`);
     console.log(`   Red LAN:  http://[TU_IP_LOCAL]:${PORT}`);
-    console.log(`\n📡 Endpoints disponibles:`);
+    console.log(`\n📡 Endpoints API:`);
     console.log(`   POST   http://localhost:${PORT}/api/auth/register`);
     console.log(`   POST   http://localhost:${PORT}/api/auth/login`);
     console.log(`   POST   http://localhost:${PORT}/api/auth/forgot-password`);
@@ -177,6 +204,11 @@ initializeSchema().then(() => {
     console.log(`   POST   http://localhost:${PORT}/api/tags`);
     console.log(`   GET    http://localhost:${PORT}/api/tag/:id  (API JSON)`);
     console.log(`   GET    http://localhost:${PORT}/tag/:id       (Página pública HTML)`);
+    console.log(`\n🌐 Páginas del Frontend:`);
+    console.log(`   GET    http://localhost:${PORT}/          (Landing Page)`);
+    console.log(`   GET    http://localhost:${PORT}/login     (Iniciar sesión)`);
+    console.log(`   GET    http://localhost:${PORT}/register  (Registro)`);
+    console.log(`   GET    http://localhost:${PORT}/dashboard  (Panel de usuario)`);
     console.log(`\n💾 Base de datos: PostgreSQL (safetag)`);
     console.log(`\n✅ Servidor listo!\n`);
   });
